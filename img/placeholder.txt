@@ -1,0 +1,8 @@
+This directory will contain image assets for the object detection interactive article.
+
+Images to be added include:
+- Example images for object detection demonstration
+- Algorithm comparison images
+- Network architecture diagrams
+- Visual examples of feature extraction
+- Historical timeline reference images 
