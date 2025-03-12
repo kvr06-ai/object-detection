@@ -1346,8 +1346,8 @@ function generateSSDArchitectureVisual() {
     if (!container) return;
     
     const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 320;
+    canvas.width = 950;  // Increased width further to ensure Detection Results is fully visible
+    canvas.height = 350; // Maintaining height for better spacing
     canvas.style.maxWidth = '100%';
     container.appendChild(canvas);
     
@@ -1373,6 +1373,12 @@ function generateSSDArchitectureVisual() {
     const startX = 50;
     const midY = canvas.height / 2;
     
+    // Draw title - positioned higher to avoid overlap
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('SSD: Single Shot MultiBox Detector', canvas.width/2, 40);
+    
     // Draw input image
     drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
     
@@ -1383,7 +1389,7 @@ function generateSSDArchitectureVisual() {
     
     // Draw feature maps at different scales
     const featureMapsStartX = backboneX + boxWidth + 80;
-    const featureMapsWidth = 320;
+    const featureMapsWidth = 350;  // Increased width for feature maps area
     
     // Draw feature pyramid box
     ctx.fillStyle = 'rgba(52, 152, 219, 0.1)'; // Light blue background
@@ -1392,15 +1398,9 @@ function generateSSDArchitectureVisual() {
     ctx.lineWidth = 2;
     ctx.strokeRect(featureMapsStartX, midY - 120, featureMapsWidth, 240);
     
-    // Label for feature maps
-    ctx.font = 'bold 16px Arial';
-    ctx.fillStyle = colors.text;
-    ctx.textAlign = 'center';
-    ctx.fillText('Multi-scale Feature Maps', featureMapsStartX + featureMapsWidth/2, midY - 135);
-    
     // Draw feature maps
     const numFeatureMaps = 5;
-    const featureMapHeight = [20, 30, 40, 50, 60]; // Different sizes to show scale
+    const featureMapHeight = [25, 35, 45, 55, 65]; // Different sizes to show scale
     const featureMapSpacing = featureMapsWidth / (numFeatureMaps + 1);
     
     for (let i = 0; i < numFeatureMaps; i++) {
@@ -1410,13 +1410,13 @@ function generateSSDArchitectureVisual() {
         
         // Draw feature map as grid
         ctx.fillStyle = colors.featureMap;
-        ctx.globalAlpha = 0.7 - (i * 0.1); // Decreasing opacity for deeper layers
+        ctx.globalAlpha = 0.8 - (i * 0.1); // Decreasing opacity for deeper layers
         ctx.fillRect(fmX, fmY, fmSize, fmSize);
         ctx.globalAlpha = 1.0;
         
         // Grid lines
         const gridSize = i + 2; // More cells for earlier (higher resolution) feature maps
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.lineWidth = 0.5;
         
         // Draw grid
@@ -1434,14 +1434,14 @@ function generateSSDArchitectureVisual() {
             ctx.stroke();
         }
         
-        // Add label
-        ctx.font = '11px Arial';
+        // Add label for grid size
+        ctx.font = '12px Arial';
         ctx.fillStyle = colors.text;
         ctx.textAlign = 'center';
-        ctx.fillText(`${6 - i}×${6 - i}`, fmX + fmSize/2, fmY + fmSize + 15);
+        ctx.fillText(`${(6-i)}×${(6-i)}`, fmX + fmSize/2, fmY + fmSize + 18);
     }
     
-    // Draw example detections at a couple of feature map cells
+    // Draw example default boxes more clearly
     // 1. Draw default boxes at a cell in feature map 1 (higher resolution)
     const fm1X = featureMapsStartX + featureMapSpacing - featureMapHeight[0]/2;
     const fm1Y = midY - featureMapHeight[0]/2;
@@ -1451,8 +1451,8 @@ function generateSSDArchitectureVisual() {
     ctx.fillStyle = 'rgba(231, 76, 60, 0.3)'; // Light red
     ctx.fillRect(fm1X + fm1CellSize/2, fm1Y + fm1CellSize/2, fm1CellSize, fm1CellSize);
     
-    // Default boxes (small objects)
-    drawDefaultBoxes(fm1X + fm1CellSize, fm1Y + fm1CellSize, 40, colors.detection, 2);
+    // Draw default boxes connected to the cell
+    drawDefaultBoxes(fm1X + fm1CellSize, fm1Y + fm1CellSize, 45, colors.detection, 2, "Default Boxes");
     
     // 2. Draw default boxes at a cell in feature map 4 (lower resolution)
     const fm4X = featureMapsStartX + 4 * featureMapSpacing - featureMapHeight[3]/2;
@@ -1463,14 +1463,14 @@ function generateSSDArchitectureVisual() {
     ctx.fillStyle = 'rgba(231, 76, 60, 0.3)'; // Light red
     ctx.fillRect(fm4X + fm4CellSize, fm4Y + fm4CellSize, fm4CellSize, fm4CellSize);
     
-    // Default boxes (larger objects)
-    drawDefaultBoxes(fm4X + fm4CellSize*1.5, fm4Y + fm4CellSize*1.5, 60, colors.detection, 3);
+    // Draw default boxes connected to the cell
+    drawDefaultBoxes(fm4X + fm4CellSize*1.5, fm4Y + fm4CellSize*1.5, 65, colors.detection, 3, "Default Boxes");
     
     // Draw arrow to output
     const outputX = featureMapsStartX + featureMapsWidth + 80;
     drawArrow(featureMapsStartX + featureMapsWidth, midY, outputX - 30, midY);
     
-    // Draw output
+    // Draw output - making it clearly visible and ensuring it fits
     drawComponent(outputX, midY, boxWidth + 20, boxHeight, colors.output, 'Detection Results');
     
     // Draw example output
@@ -1494,18 +1494,15 @@ function generateSSDArchitectureVisual() {
     ctx.strokeRect(exampleX + 20, exampleY - 10, 50, 30); // Larger object
     ctx.fillText('Person: 0.87', exampleX + 45, exampleY - 15);
     
-    // Draw title
-    ctx.font = 'bold 24px Arial';
+    // Add explanation text as footer instead of overlapping
+    ctx.font = 'italic 16px Arial';
     ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
-    ctx.fillText('SSD: Single Shot MultiBox Detector', canvas.width/2, 30);
-    
-    // Add explanation text
-    ctx.font = 'italic 14px Arial';
-    ctx.fillText('Predicts detections at multiple scales from different feature maps in a single forward pass', canvas.width/2, 60);
+    ctx.fillText('Predicts detections at multiple scales from different feature maps in a single forward pass', 
+                 canvas.width/2, canvas.height - 20);
     
     // Helper function to draw default boxes
-    function drawDefaultBoxes(x, y, radius, color, count) {
+    function drawDefaultBoxes(x, y, radius, color, count, label) {
         const aspectRatios = [1, 0.6, 1.6]; // Square, tall, wide
         
         for (let i = 0; i < count; i++) {
@@ -1516,7 +1513,7 @@ function generateSSDArchitectureVisual() {
             
             // Draw boxes with different sizes and aspect ratios
             ctx.strokeStyle = color;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.5;
             ctx.strokeRect(x - width/2, y - height/2, width, height);
         }
         
@@ -1526,7 +1523,7 @@ function generateSSDArchitectureVisual() {
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + 50, y - 30);
+        ctx.lineTo(x + 40, y - 25);
         ctx.stroke();
         ctx.setLineDash([]);
         
@@ -1534,7 +1531,7 @@ function generateSSDArchitectureVisual() {
         ctx.font = '12px Arial';
         ctx.fillStyle = color;
         ctx.textAlign = 'left';
-        ctx.fillText('Default Boxes', x + 55, y - 30);
+        ctx.fillText(label, x + 45, y - 25);
     }
     
     // Helper function to draw a component box with text
