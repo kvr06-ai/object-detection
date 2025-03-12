@@ -179,51 +179,76 @@ section {
 .timeline-container {
     overflow-x: auto;
     margin: 2rem 0;
+    padding: 0.5rem;
 }
 
 .timeline {
-    display: flex;
+    display: block;
     min-width: 100%;
-    height: 150px;
+    height: 250px;
     position: relative;
-    padding: 20px 0;
+    padding: 10px 0 30px;
+    margin-top: 40px;  /* Added space for top labels */
+    margin-bottom: 40px; /* Added space for bottom labels */
 }
 
 .timeline-event {
     position: absolute;
-    transform: translate(-50%, -50%);
-    transition: all var(--transition-speed);
     cursor: pointer;
-}
-
-.timeline-event::before {
-    content: '';
-    display: block;
-    width: 15px;
-    height: 15px;
-    background-color: var(--secondary-color);
-    border-radius: 50%;
-    margin: 0 auto 5px;
+    z-index: 5;
 }
 
 .timeline-event:hover {
-    transform: translate(-50%, -60%);
+    z-index: 10;
 }
 
 .timeline-event-content {
     display: none;
     background: white;
     padding: 15px;
-    border-radius: 4px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-    min-width: 200px;
-    max-width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    max-width: 320px;
     position: absolute;
-    z-index: 10;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    border: 1px solid #eee;
+    color: var(--text-color);
+}
+
+.timeline-event-content h4 {
+    margin-top: 0;
+    color: var(--secondary-color);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.timeline-event-content p {
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .timeline-event:hover .timeline-event-content {
     display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.timeline-axis {
+    z-index: 1;
+}
+
+.timeline-year-marker {
+    z-index: 2;
 }
 
 /* Images and figures */
@@ -329,6 +354,15 @@ footer {
     
     .container {
         width: 95%;
+    }
+    
+    .timeline {
+        height: 300px; /* Taller on mobile for better spacing */
+    }
+    
+    .timeline-event-content {
+        min-width: 180px;
+        max-width: 260px;
     }
 }
 

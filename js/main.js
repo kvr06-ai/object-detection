@@ -44,6 +44,13 @@ function initTimeline() {
         { year: 2023, name: "RT-DETR", description: "Real-Time Detection Transformer" }
     ];
     
+    // Clear existing timeline content
+    timeline.innerHTML = '';
+    
+    // Set timeline dimensions and style
+    timeline.style.position = 'relative';
+    timeline.style.height = '250px'; // Increased height to accommodate staggered layout
+    
     // Calculate timeline dimensions
     const minYear = 2000;
     const maxYear = 2024;
@@ -54,11 +61,12 @@ function initTimeline() {
     const axis = document.createElement('div');
     axis.className = 'timeline-axis';
     axis.style.position = 'absolute';
-    axis.style.bottom = '0';
+    axis.style.top = '50%'; // Center line in the timeline
     axis.style.left = '0';
     axis.style.width = '100%';
     axis.style.height = '2px';
-    axis.style.backgroundColor = '#ccc';
+    axis.style.backgroundColor = '#3498db';
+    axis.style.zIndex = '1';
     timeline.appendChild(axis);
     
     // Add year markers
@@ -66,40 +74,129 @@ function initTimeline() {
         const yearMarker = document.createElement('div');
         yearMarker.className = 'timeline-year-marker';
         yearMarker.style.position = 'absolute';
-        yearMarker.style.bottom = '0';
+        yearMarker.style.top = '50%'; // Align with center line
         yearMarker.style.left = `${(year - minYear) * yearWidth}px`;
         yearMarker.style.transform = 'translateX(-50%)';
+        yearMarker.style.zIndex = '2';
         
         const yearLine = document.createElement('div');
         yearLine.style.width = '1px';
         yearLine.style.height = '10px';
-        yearLine.style.backgroundColor = '#ccc';
+        yearLine.style.backgroundColor = '#666';
         yearLine.style.margin = '0 auto';
+        yearLine.style.transform = 'translateY(-50%)';
         yearMarker.appendChild(yearLine);
         
         const yearLabel = document.createElement('div');
         yearLabel.textContent = year;
-        yearLabel.style.fontSize = '12px';
+        yearLabel.style.fontSize = '11px';
         yearLabel.style.color = '#666';
-        yearLabel.style.marginTop = '5px';
+        yearLabel.style.marginTop = '10px';
         yearMarker.appendChild(yearLabel);
         
         timeline.appendChild(yearMarker);
     }
     
-    // Add algorithm events
-    timelineData.forEach(item => {
+    // Prepare for conflict resolution
+    const usedPositions = {};
+    const itemWidth = 100; // Estimated width of each item in pixels
+    
+    // Add algorithm events with staggered layout
+    timelineData.forEach((item, index) => {
         const event = document.createElement('div');
         event.className = 'timeline-event';
-        event.style.left = `${(item.year - minYear) * yearWidth}px`;
-        event.style.top = '50%';
         
+        // Calculate position
+        const leftPosition = (item.year - minYear) * yearWidth;
+        event.style.left = `${leftPosition}px`;
+        
+        // Check for potential conflicts (items too close to each other)
+        let position = index % 2 === 0 ? 'top' : 'bottom'; // Initial position alternating top/bottom
+        
+        // Get nearby items
+        const nearbyPositions = [];
+        for (let y = item.year - 1; y <= item.year + 1; y++) {
+            if (usedPositions[y]) {
+                nearbyPositions.push(...usedPositions[y]);
+            }
+        }
+        
+        // If there's a conflict in the initial position, try the opposite
+        if (nearbyPositions.includes(position)) {
+            position = position === 'top' ? 'bottom' : 'top';
+            
+            // If still conflicting, adjust horizontal position slightly
+            if (nearbyPositions.includes(position)) {
+                event.style.left = `${leftPosition + 10}px`; // Offset slightly
+            }
+        }
+        
+        // Record this position as used
+        if (!usedPositions[item.year]) {
+            usedPositions[item.year] = [];
+        }
+        usedPositions[item.year].push(position);
+        
+        // Set vertical position
+        if (position === 'top') {
+            event.style.top = '25%';
+        } else {
+            event.style.top = '75%';
+        }
+        
+        // Make event position absolute
+        event.style.position = 'absolute';
+        event.style.transform = 'translate(-50%, -50%)';
+        event.style.zIndex = '3';
+        
+        // Create dot indicator
+        const eventDot = document.createElement('div');
+        eventDot.style.width = '12px';
+        eventDot.style.height = '12px';
+        eventDot.style.backgroundColor = '#3498db';
+        eventDot.style.borderRadius = '50%';
+        eventDot.style.margin = '0 auto 5px';
+        eventDot.style.border = '2px solid white';
+        eventDot.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        event.appendChild(eventDot);
+        
+        // Create connecting line to timeline
+        const connectingLine = document.createElement('div');
+        connectingLine.style.width = '1px';
+        connectingLine.style.height = position === 'top' ? '45px' : '44px';
+        connectingLine.style.backgroundColor = '#ccc';
+        connectingLine.style.margin = '0 auto';
+        connectingLine.style.position = 'absolute';
+        connectingLine.style.left = '50%';
+        connectingLine.style.top = position === 'top' ? '100%' : 'auto';
+        connectingLine.style.bottom = position === 'bottom' ? '100%' : 'auto';
+        connectingLine.style.transform = 'translateX(-50%)';
+        event.appendChild(connectingLine);
+        
+        // Create event label with more space
         const eventLabel = document.createElement('div');
         eventLabel.textContent = item.name;
         eventLabel.style.fontSize = '12px';
+        eventLabel.style.fontWeight = 'bold';
         eventLabel.style.textAlign = 'center';
+        eventLabel.style.width = '90px';
+        eventLabel.style.color = '#2c3e50';
+        eventLabel.style.position = 'absolute';
+        eventLabel.style.left = '50%';
+        eventLabel.style.transform = 'translateX(-50%)';
+        
+        // Position the label based on top/bottom
+        if (position === 'top') {
+            eventLabel.style.bottom = '100%';
+            eventLabel.style.marginBottom = '8px';
+        } else {
+            eventLabel.style.top = '100%';
+            eventLabel.style.marginTop = '8px';
+        }
+        
         event.appendChild(eventLabel);
         
+        // Create tooltip content
         const eventContent = document.createElement('div');
         eventContent.className = 'timeline-event-content';
         eventContent.innerHTML = `
@@ -108,6 +205,7 @@ function initTimeline() {
         `;
         event.appendChild(eventContent);
         
+        // Add event to timeline
         timeline.appendChild(event);
     });
 }
