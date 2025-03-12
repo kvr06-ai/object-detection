@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAlgorithmComparisonChart();
     initDETRAttentionDemo();
     initDetectorChallenge();
+    generateHaarFeatureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -736,4 +737,118 @@ function initDetectorChallenge() {
             }
         });
     });
+}
+
+// Generate Haar feature visualization for Viola-Jones section
+function generateHaarFeatureVisual() {
+    const visualContainer = document.querySelector('.haar-features-container');
+    if (!visualContainer) return;
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 300;
+    canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto';
+    visualContainer.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Draw a face outline to provide context
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw a light gray face outline in the background
+    ctx.fillStyle = '#e0e0e0';
+    ctx.beginPath();
+    ctx.ellipse(300, 150, 120, 160, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Function to draw a Haar feature
+    function drawHaarFeature(x, y, width, height, featureType, label) {
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        
+        // Based on the feature type, draw the appropriate pattern
+        if (featureType === 'edge') {
+            // Edge feature (two rectangles side by side)
+            const halfWidth = width / 2;
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x, y, halfWidth, height);
+            
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.7)'; // Blue
+            ctx.fillRect(x + halfWidth, y, halfWidth, height);
+            
+        } else if (featureType === 'line') {
+            // Line feature (three rectangles)
+            const thirdWidth = width / 3;
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x, y, thirdWidth, height);
+            
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.7)'; // Blue
+            ctx.fillRect(x + thirdWidth, y, thirdWidth, height);
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + 2 * thirdWidth, y, thirdWidth, height);
+            
+        } else if (featureType === 'center-surround') {
+            // Center-surround feature (four rectangles in a 2x2 grid)
+            const halfWidth = width / 2;
+            const halfHeight = height / 2;
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x, y, halfWidth, halfHeight);
+            
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.7)'; // Blue
+            ctx.fillRect(x + halfWidth, y, halfWidth, halfHeight);
+            
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.7)'; // Blue
+            ctx.fillRect(x, y + halfHeight, halfWidth, halfHeight);
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + halfWidth, y + halfHeight, halfWidth, halfHeight);
+        }
+        
+        // Add label if provided
+        if (label) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x + width/2, y + height + 20);
+        }
+    }
+    
+    // Draw example Haar features
+    // Eyes
+    drawHaarFeature(220, 80, 80, 30, 'edge', 'Eye Feature');
+    drawHaarFeature(300, 80, 80, 30, 'edge', '');
+    
+    // Nose
+    drawHaarFeature(275, 130, 50, 70, 'line', 'Nose Feature');
+    
+    // Mouth
+    drawHaarFeature(240, 200, 120, 30, 'edge', 'Mouth Feature');
+    
+    // Center-surround features for cheeks
+    drawHaarFeature(180, 150, 60, 60, 'center-surround', 'Center-Surround');
+    drawHaarFeature(360, 150, 60, 60, 'center-surround', '');
+    
+    // Add title and description
+    const title = document.createElement('h4');
+    title.textContent = 'Haar-like Features';
+    title.style.textAlign = 'center';
+    title.style.marginTop = '1rem';
+    
+    const description = document.createElement('p');
+    description.textContent = 'Different types of Haar features detect edges, lines, and center-surround patterns. The Viola-Jones detector uses thousands of these features to identify faces.';
+    description.style.fontSize = '0.9rem';
+    description.style.textAlign = 'center';
+    description.style.margin = '0.5rem 0';
+    
+    // Add elements to DOM
+    visualContainer.appendChild(title);
+    visualContainer.appendChild(description);
 } 

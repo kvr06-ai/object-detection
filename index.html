@@ -58,8 +58,8 @@
                 <p>Haar-like features are simple rectangular filters that detect basic visual patterns like edges, lines, and center-surround features. These features are computed using integral images, which allow for constant-time feature computation regardless of filter size - a critical optimization that made real-time performance possible.</p>
                 
                 <figure>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Haar_features.jpg" alt="Haar features used in Viola-Jones detection" width="400">
-                    <figcaption>Haar-like features detect simple visual patterns like edges, lines, and center-surround differences.</figcaption>
+                    <img src="img/haar_features.png" alt="Haar features used in Viola-Jones detection" width="500">
+                    <figcaption>Haar-like features detect simple visual patterns like edges, lines, and center-surround differences. Image source: Wikipedia</figcaption>
                 </figure>
                 
                 <p>The cascade classifier architecture was perhaps the most innovative aspect of their work. By arranging classifiers in stages of increasing complexity, most non-face regions could be quickly rejected in early stages, focusing computational resources on promising regions. This "attentional cascade" approach reduced computation time dramatically while maintaining accuracy.</p>

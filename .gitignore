@@ -1,0 +1,62 @@
+# Project specific
+article_outline.md
+
+# Node modules and dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+yarn.lock
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Image files
+img/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+
+# Build output
+dist/
+build/
+.cache/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# IDE specific files
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/ 
