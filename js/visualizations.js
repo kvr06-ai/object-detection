@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateDPMVisualization();
     generateRCNNArchitectureVisual();
     generateMaskRCNNArchitectureVisual();
+    generateSSDArchitectureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -1330,6 +1331,262 @@ function generateMaskRCNNArchitectureVisual() {
         ctx.fillStyle = color;
         ctx.textAlign = 'center';
         ctx.fillText(text, x + boxWidth/2, y);
+    }
+    
+    // Helper function to darken a color for borders
+    function darkenColor(color) {
+        // Simple darkening for example purposes
+        return color;
+    }
+}
+
+// Generate SSD architecture visualization
+function generateSSDArchitectureVisual() {
+    const container = document.getElementById('ssd-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 320;
+    canvas.style.maxWidth = '100%';
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db',      // blue
+        backbone: '#2ecc71',   // green
+        featureMap: '#9b59b6', // purple
+        detection: '#e74c3c',  // red
+        output: '#f39c12',     // orange
+        text: '#2c3e50'        // dark blue
+    };
+    
+    // Define components
+    const boxHeight = 60;
+    const boxWidth = 100;
+    const startX = 50;
+    const midY = canvas.height / 2;
+    
+    // Draw input image
+    drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
+    
+    // Draw VGG or backbone network
+    const backboneX = startX + boxWidth + 50;
+    drawComponent(backboneX, midY, boxWidth, boxHeight, colors.backbone, 'VGG Backbone');
+    drawArrow(startX + boxWidth, midY, backboneX, midY);
+    
+    // Draw feature maps at different scales
+    const featureMapsStartX = backboneX + boxWidth + 80;
+    const featureMapsWidth = 320;
+    
+    // Draw feature pyramid box
+    ctx.fillStyle = 'rgba(52, 152, 219, 0.1)'; // Light blue background
+    ctx.fillRect(featureMapsStartX, midY - 120, featureMapsWidth, 240);
+    ctx.strokeStyle = colors.backbone;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(featureMapsStartX, midY - 120, featureMapsWidth, 240);
+    
+    // Label for feature maps
+    ctx.font = 'bold 16px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Multi-scale Feature Maps', featureMapsStartX + featureMapsWidth/2, midY - 135);
+    
+    // Draw feature maps
+    const numFeatureMaps = 5;
+    const featureMapHeight = [20, 30, 40, 50, 60]; // Different sizes to show scale
+    const featureMapSpacing = featureMapsWidth / (numFeatureMaps + 1);
+    
+    for (let i = 0; i < numFeatureMaps; i++) {
+        const fmX = featureMapsStartX + (i + 1) * featureMapSpacing - featureMapHeight[i]/2;
+        const fmY = midY - featureMapHeight[i]/2;
+        const fmSize = featureMapHeight[i];
+        
+        // Draw feature map as grid
+        ctx.fillStyle = colors.featureMap;
+        ctx.globalAlpha = 0.7 - (i * 0.1); // Decreasing opacity for deeper layers
+        ctx.fillRect(fmX, fmY, fmSize, fmSize);
+        ctx.globalAlpha = 1.0;
+        
+        // Grid lines
+        const gridSize = i + 2; // More cells for earlier (higher resolution) feature maps
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 0.5;
+        
+        // Draw grid
+        for (let j = 1; j < gridSize; j++) {
+            // Vertical lines
+            ctx.beginPath();
+            ctx.moveTo(fmX + (fmSize / gridSize) * j, fmY);
+            ctx.lineTo(fmX + (fmSize / gridSize) * j, fmY + fmSize);
+            ctx.stroke();
+            
+            // Horizontal lines
+            ctx.beginPath();
+            ctx.moveTo(fmX, fmY + (fmSize / gridSize) * j);
+            ctx.lineTo(fmX + fmSize, fmY + (fmSize / gridSize) * j);
+            ctx.stroke();
+        }
+        
+        // Add label
+        ctx.font = '11px Arial';
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = 'center';
+        ctx.fillText(`${6 - i}×${6 - i}`, fmX + fmSize/2, fmY + fmSize + 15);
+    }
+    
+    // Draw example detections at a couple of feature map cells
+    // 1. Draw default boxes at a cell in feature map 1 (higher resolution)
+    const fm1X = featureMapsStartX + featureMapSpacing - featureMapHeight[0]/2;
+    const fm1Y = midY - featureMapHeight[0]/2;
+    const fm1CellSize = featureMapHeight[0] / 2;
+    
+    // Highlight a cell
+    ctx.fillStyle = 'rgba(231, 76, 60, 0.3)'; // Light red
+    ctx.fillRect(fm1X + fm1CellSize/2, fm1Y + fm1CellSize/2, fm1CellSize, fm1CellSize);
+    
+    // Default boxes (small objects)
+    drawDefaultBoxes(fm1X + fm1CellSize, fm1Y + fm1CellSize, 40, colors.detection, 2);
+    
+    // 2. Draw default boxes at a cell in feature map 4 (lower resolution)
+    const fm4X = featureMapsStartX + 4 * featureMapSpacing - featureMapHeight[3]/2;
+    const fm4Y = midY - featureMapHeight[3]/2;
+    const fm4CellSize = featureMapHeight[3] / 3;
+    
+    // Highlight a cell
+    ctx.fillStyle = 'rgba(231, 76, 60, 0.3)'; // Light red
+    ctx.fillRect(fm4X + fm4CellSize, fm4Y + fm4CellSize, fm4CellSize, fm4CellSize);
+    
+    // Default boxes (larger objects)
+    drawDefaultBoxes(fm4X + fm4CellSize*1.5, fm4Y + fm4CellSize*1.5, 60, colors.detection, 3);
+    
+    // Draw arrow to output
+    const outputX = featureMapsStartX + featureMapsWidth + 80;
+    drawArrow(featureMapsStartX + featureMapsWidth, midY, outputX - 30, midY);
+    
+    // Draw output
+    drawComponent(outputX, midY, boxWidth + 20, boxHeight, colors.output, 'Detection Results');
+    
+    // Draw example output
+    const exampleX = outputX + boxWidth + 40;
+    const exampleY = midY;
+    const exampleSize = 80;
+    
+    // Draw example image with detections
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(exampleX, exampleY - exampleSize/2, exampleSize, exampleSize);
+    
+    // Draw detection boxes of different sizes
+    ctx.strokeStyle = colors.detection;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(exampleX + 10, exampleY - 30, 25, 25); // Small object
+    ctx.font = '10px Arial';
+    ctx.fillStyle = colors.detection;
+    ctx.textAlign = 'center';
+    ctx.fillText('Car: 0.92', exampleX + 22, exampleY - 35);
+    
+    ctx.strokeRect(exampleX + 20, exampleY - 10, 50, 30); // Larger object
+    ctx.fillText('Person: 0.87', exampleX + 45, exampleY - 15);
+    
+    // Draw title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('SSD: Single Shot MultiBox Detector', canvas.width/2, 30);
+    
+    // Add explanation text
+    ctx.font = 'italic 14px Arial';
+    ctx.fillText('Predicts detections at multiple scales from different feature maps in a single forward pass', canvas.width/2, 60);
+    
+    // Helper function to draw default boxes
+    function drawDefaultBoxes(x, y, radius, color, count) {
+        const aspectRatios = [1, 0.6, 1.6]; // Square, tall, wide
+        
+        for (let i = 0; i < count; i++) {
+            const arIndex = i % aspectRatios.length;
+            const ar = aspectRatios[arIndex];
+            const width = radius * Math.sqrt(ar);
+            const height = radius / Math.sqrt(ar);
+            
+            // Draw boxes with different sizes and aspect ratios
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - width/2, y - height/2, width, height);
+        }
+        
+        // Add small connection line
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 50, y - 30);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Add label
+        ctx.font = '12px Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'left';
+        ctx.fillText('Default Boxes', x + 55, y - 30);
+    }
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = darkenColor(color);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Handle multi-line text
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const line1 = words.slice(0, words.length/2).join(' ');
+            const line2 = words.slice(words.length/2).join(' ');
+            ctx.fillText(line1, x + width/2, y - 10);
+            ctx.fillText(line2, x + width/2, y + 10);
+        } else {
+            ctx.fillText(text, x + width/2, y);
+        }
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = colors.text;
+        ctx.fill();
     }
     
     // Helper function to darken a color for borders
