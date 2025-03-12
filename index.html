@@ -106,11 +106,11 @@
                 </ol>
                 
                 <h3>DPM (Deformable Parts Models)</h3>
-                <p>Pedro Felzenszwalb and colleagues introduced <a href="https://en.wikipedia.org/wiki/Deformable_Part_Model" target="_blank">Deformable Parts Models (DPM)</a> in 2008, extending HOG by modeling objects as collections of parts arranged in a deformable configuration. DPM addressed one of HOG's major limitations: the inability to handle significant variations in object appearance and pose.</p>
+                <p>Pedro Felzenszwalb and colleagues introduced <a href="https://en.wikipedia.org/wiki/Deformable_parts_models" target="_blank">Deformable Parts Models (DPM)</a> in 2008, extending HOG by modeling objects as collections of parts arranged in a deformable configuration. DPM addressed one of HOG's major limitations: the inability to handle significant variations in object appearance and pose.</p>
                 
-                <figure>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/76/DPM_person_model.jpg" alt="Deformable Parts Model visualization" width="500">
-                    <figcaption>DPM models objects as a root filter plus deformable part filters, allowing it to handle variations in object pose and appearance.</figcaption>
+                <figure id="dpm-visualization">
+                    <!-- The DPM visualization will be rendered here by JavaScript -->
+                    <figcaption>DPM models objects as a root filter plus deformable part filters, allowing it to handle variations in object pose and appearance. The root filter captures the overall shape while part filters handle detailed components with deformation costs for flexibility.</figcaption>
                 </figure>
                 
                 <p>DPM works by defining a "root" filter for the entire object and smaller part filters that can move relative to the root. Each part has an anchor position and a deformation cost for moving away from that position. During detection, the algorithm finds the optimal placement of all parts to maximize the overall score.</p>

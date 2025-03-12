@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDETRAttentionDemo();
     initDetectorChallenge();
     generateHaarFeatureVisual();
+    generateDPMVisualization();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -851,4 +852,132 @@ function generateHaarFeatureVisual() {
     // Add elements to DOM
     visualContainer.appendChild(title);
     visualContainer.appendChild(description);
+}
+
+// Generate DPM visualization
+function generateDPMVisualization() {
+    const container = document.getElementById('dpm-visualization');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 350;
+    canvas.style.maxWidth = '100%';
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw the root filter (entire person)
+    const rootX = 100;
+    const rootY = 50;
+    const rootWidth = 150;
+    const rootHeight = 250;
+    
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(rootX, rootY, rootWidth, rootHeight);
+    ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
+    ctx.fillRect(rootX, rootY, rootWidth, rootHeight);
+    
+    // Add root filter label
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#2c3e50';
+    ctx.textAlign = 'center';
+    ctx.fillText('Root Filter', rootX + rootWidth/2, rootY + rootHeight + 25);
+    
+    // Draw part filters (head, torso, limbs)
+    const parts = [
+        { x: rootX + 50, y: rootY + 20, width: 50, height: 50, name: 'Head' },
+        { x: rootX + 40, y: rootY + 80, width: 70, height: 70, name: 'Torso' },
+        { x: rootX + 20, y: rootY + 130, width: 40, height: 80, name: 'Left Leg' },
+        { x: rootX + 90, y: rootY + 130, width: 40, height: 80, name: 'Right Leg' },
+        { x: rootX + 10, y: rootY + 80, width: 30, height: 70, name: 'Left Arm' },
+        { x: rootX + 110, y: rootY + 80, width: 30, height: 70, name: 'Right Arm' }
+    ];
+    
+    // Draw parts
+    parts.forEach(part => {
+        ctx.strokeStyle = '#e74c3c';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(part.x, part.y, part.width, part.height);
+        ctx.fillStyle = 'rgba(231, 76, 60, 0.2)';
+        ctx.fillRect(part.x, part.y, part.width, part.height);
+    });
+    
+    // Draw spring connections (deformation costs)
+    ctx.strokeStyle = 'rgba(44, 62, 80, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 3]);
+    parts.forEach(part => {
+        ctx.beginPath();
+        ctx.moveTo(rootX + rootWidth/2, rootY + rootHeight/2);
+        ctx.lineTo(part.x + part.width/2, part.y + part.height/2);
+        ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    
+    // Draw deformation visualization on the right
+    const deformX = 350;
+    const deformY = 70;
+    const deformWidth = 150;
+    const deformHeight = 200;
+    
+    // Original position
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(deformX, deformY, 60, 60);
+    ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
+    ctx.fillRect(deformX, deformY, 60, 60);
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillText('Original Position', deformX + 30, deformY + 80);
+    
+    // Deformed position
+    const shift = 40;
+    ctx.strokeStyle = '#e74c3c';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(deformX + shift, deformY + shift, 60, 60);
+    ctx.fillStyle = 'rgba(231, 76, 60, 0.2)';
+    ctx.fillRect(deformX + shift, deformY + shift, 60, 60);
+    ctx.fillStyle = '#e74c3c';
+    ctx.fillText('Deformed Position', deformX + shift + 30, deformY + shift + 80);
+    
+    // Draw spring
+    ctx.strokeStyle = 'rgba(44, 62, 80, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(deformX + 30, deformY + 30);
+    ctx.lineTo(deformX + shift + 30, deformY + shift + 30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Arrow pointing to deformation cost
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Deformation Cost', deformX + shift/2 + 30, deformY + shift/2 + 10);
+    
+    // Title and explanation
+    ctx.font = 'bold 18px Arial';
+    ctx.fillStyle = '#2c3e50';
+    ctx.textAlign = 'center';
+    ctx.fillText('Deformable Parts Model (DPM)', canvas.width/2, 30);
+    
+    // Save as an image file
+    saveCanvasAsImage(canvas, 'dpm_model.png');
+}
+
+// Helper function to save canvas as image file
+function saveCanvasAsImage(canvas, filename) {
+    // In a real implementation, this would save the canvas to a file
+    // For our demo purposes, we'll just output to the console
+    console.log(`Visualization generated for ${filename}`);
+    
+    // In production, you might use:
+    // const dataUrl = canvas.toDataURL('image/png');
+    // And then save this data URL to a file or display it
 } 
