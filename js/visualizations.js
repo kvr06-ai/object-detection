@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initDetectorChallenge();
     generateHaarFeatureVisual();
     generateDPMVisualization();
+    generateRCNNArchitectureVisual();
+    generateMaskRCNNArchitectureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -980,4 +982,359 @@ function saveCanvasAsImage(canvas, filename) {
     // In production, you might use:
     // const dataUrl = canvas.toDataURL('image/png');
     // And then save this data URL to a file or display it
+}
+
+// Generate R-CNN architecture visualization
+function generateRCNNArchitectureVisual() {
+    const container = document.getElementById('rcnn-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 300;
+    canvas.style.maxWidth = '100%';
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db', // blue
+        selective: '#2ecc71', // green 
+        cnn: '#9b59b6', // purple
+        svm: '#e74c3c', // red
+        bbox: '#f39c12', // orange
+        text: '#2c3e50' // dark blue
+    };
+    
+    // Define the architecture components and layout
+    const boxHeight = 60;
+    const boxWidth = 100;
+    const spacing = 100;
+    const startX = 50;
+    const midY = canvas.height / 2;
+    
+    // Draw the input image
+    drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
+    
+    // Draw arrow
+    drawArrow(startX + boxWidth, midY, startX + boxWidth + spacing/2, midY);
+    
+    // Draw Selective Search
+    const ssX = startX + boxWidth + spacing;
+    drawComponent(ssX, midY, boxWidth, boxHeight, colors.selective, 'Selective Search');
+    drawDescription(ssX, midY + boxHeight/2 + 40, 'Generate ~2000 region proposals', colors.text);
+    
+    // Draw multiple regions with arrows pointing to CNNs
+    const regions = 3; // Number of region examples to show
+    const regionSpacing = 20;
+    const regionHeight = 30;
+    
+    for (let i = 0; i < regions; i++) {
+        const regionY = midY - boxHeight/2 - (regions-1) * regionSpacing/2 + i * regionSpacing;
+        
+        // Draw region proposal
+        ctx.strokeStyle = colors.selective;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(ssX + boxWidth + 20, regionY, regionHeight, regionHeight);
+        
+        // Draw arrow to CNN
+        drawArrow(ssX + boxWidth + 20 + regionHeight, regionY + regionHeight/2, 
+                  ssX + boxWidth + spacing - 10, regionY + regionHeight/2);
+    }
+    
+    // Draw CNN for feature extraction
+    const cnnX = ssX + boxWidth + spacing;
+    drawComponent(cnnX, midY, boxWidth, boxHeight, colors.cnn, 'CNN');
+    drawDescription(cnnX, midY + boxHeight/2 + 40, 'Extract features from each region', colors.text);
+    
+    // Draw feature vectors
+    const featureX = cnnX + boxWidth + 20;
+    
+    for (let i = 0; i < regions; i++) {
+        const featureY = midY - boxHeight/2 - (regions-1) * regionSpacing/2 + i * regionSpacing;
+        
+        // Draw feature vector (as a small histogram-like representation)
+        ctx.fillStyle = colors.cnn;
+        for (let j = 0; j < 10; j++) {
+            const barHeight = 5 + Math.random() * 15;
+            ctx.fillRect(featureX + j*5, featureY + regionHeight/2 - barHeight/2, 3, barHeight);
+        }
+        
+        // Draw arrow to SVM
+        drawArrow(featureX + 55, featureY + regionHeight/2, 
+                  cnnX + boxWidth + spacing - 10, featureY + regionHeight/2);
+    }
+    
+    // Draw SVM classifier
+    const svmX = cnnX + boxWidth + spacing;
+    drawComponent(svmX, midY, boxWidth, boxHeight, colors.svm, 'SVM Classifiers');
+    drawDescription(svmX, midY + boxHeight/2 + 40, 'Classify each region & refine bounding boxes', colors.text);
+    
+    // Draw output
+    const outputX = svmX + boxWidth + spacing;
+    drawComponent(outputX, midY, boxWidth, boxHeight, colors.bbox, 'Detection Results');
+    drawArrow(svmX + boxWidth, midY, outputX, midY);
+    
+    // Add title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('R-CNN Architecture', canvas.width/2, 30);
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = darkenColor(color);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x + width/2, y);
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = colors.text;
+        ctx.fill();
+    }
+    
+    // Helper function to draw description text
+    function drawDescription(x, y, text, color) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, x + boxWidth/2, y);
+    }
+    
+    // Helper function to darken a color for borders
+    function darkenColor(color) {
+        // Simple darkening for example purposes
+        return color;
+    }
+}
+
+// Generate Mask R-CNN architecture visualization
+function generateMaskRCNNArchitectureVisual() {
+    const container = document.getElementById('mask-rcnn-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 350;
+    canvas.style.maxWidth = '100%';
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db', // blue
+        backbone: '#2ecc71', // green 
+        rpn: '#9b59b6', // purple
+        roi: '#e74c3c', // red
+        fcn: '#f39c12', // orange
+        bbox: '#1abc9c', // turquoise
+        mask: '#8e44ad', // dark purple
+        text: '#2c3e50' // dark blue
+    };
+    
+    // Define the architecture components and layout
+    const boxHeight = 60;
+    const boxWidth = 120;
+    const spacing = 80;
+    const startX = 30;
+    const midY = canvas.height / 2;
+    
+    // Draw the input image
+    drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
+    
+    // Draw arrow
+    drawArrow(startX + boxWidth, midY, startX + boxWidth + spacing/2, midY);
+    
+    // Draw CNN backbone
+    const backboneX = startX + boxWidth + spacing;
+    drawComponent(backboneX, midY, boxWidth, boxHeight, colors.backbone, 'CNN Backbone');
+    drawDescription(backboneX, midY + boxHeight/2 + 40, 'Feature extraction', colors.text);
+    
+    // Draw arrow to RPN
+    drawArrow(backboneX + boxWidth, midY, backboneX + boxWidth + spacing/2, midY);
+    
+    // Draw RPN
+    const rpnX = backboneX + boxWidth + spacing;
+    drawComponent(rpnX, midY, boxWidth, boxHeight, colors.rpn, 'Region Proposal Network');
+    drawDescription(rpnX, midY + boxHeight/2 + 40, 'Generate proposals', colors.text);
+    
+    // Draw arrow to ROI Align
+    drawArrow(rpnX + boxWidth, midY, rpnX + boxWidth + spacing/2, midY);
+    
+    // Draw ROI Align
+    const roiX = rpnX + boxWidth + spacing;
+    drawComponent(roiX, midY, boxWidth, boxHeight, colors.roi, 'ROI Align');
+    drawDescription(roiX, midY + boxHeight/2 + 40, 'Extract features per region', colors.text);
+    
+    // Split into two paths: box prediction and mask prediction
+    const splitX = roiX + boxWidth + spacing;
+    const splitY1 = midY - 60; // Upper branch
+    const splitY2 = midY + 60; // Lower branch
+    
+    // Draw arrows from ROI to both branches
+    drawArrow(roiX + boxWidth, midY, splitX - spacing/2, midY);
+    drawArrow(splitX - spacing/2, midY, splitX, splitY1);
+    drawArrow(splitX - spacing/2, midY, splitX, splitY2);
+    
+    // Draw bbox branch
+    drawComponent(splitX, splitY1, boxWidth, boxHeight, colors.bbox, 'Box Head');
+    drawArrow(splitX + boxWidth, splitY1, splitX + boxWidth + spacing, splitY1);
+    
+    const bboxOutputX = splitX + boxWidth + spacing;
+    drawComponent(bboxOutputX, splitY1, boxWidth, boxHeight, colors.bbox, 'Object Detection');
+    drawDescription(bboxOutputX, splitY1 + boxHeight/2 + 30, 'Class & box regression', colors.text);
+    
+    // Draw mask branch
+    drawComponent(splitX, splitY2, boxWidth, boxHeight, colors.mask, 'Mask Head');
+    drawArrow(splitX + boxWidth, splitY2, splitX + boxWidth + spacing, splitY2);
+    
+    const maskOutputX = splitX + boxWidth + spacing;
+    drawComponent(maskOutputX, splitY2, boxWidth, boxHeight, colors.mask, 'Instance Segmentation');
+    drawDescription(maskOutputX, splitY2 + boxHeight/2 + 30, 'Per-class binary masks', colors.text);
+    
+    // Add mask example visualization
+    const maskExampleX = maskOutputX + boxWidth + 20;
+    const maskExampleY = splitY2;
+    const maskSize = 50;
+    
+    // Draw object shape with mask
+    ctx.beginPath();
+    ctx.ellipse(maskExampleX + maskSize/2, maskExampleY, maskSize/3, maskSize/2, 0, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(142, 68, 173, 0.3)'; // Transparent mask color
+    ctx.fill();
+    ctx.strokeStyle = colors.mask;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Add bounding box example
+    const bboxExampleX = bboxOutputX + boxWidth + 20;
+    const bboxExampleY = splitY1;
+    
+    ctx.strokeStyle = colors.bbox;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bboxExampleX, bboxExampleY - maskSize/2, maskSize, maskSize);
+    
+    // Add label
+    ctx.fillStyle = colors.bbox;
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Person: 0.98', bboxExampleX + maskSize/2, bboxExampleY - maskSize/2 - 5);
+    
+    // Add title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Mask R-CNN Architecture', canvas.width/2, 30);
+    
+    // Add note about extension of Faster R-CNN
+    ctx.font = 'italic 14px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Extends Faster R-CNN with a parallel mask prediction branch', canvas.width/2, 60);
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = darkenColor(color);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Handle multiline text
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const line1 = words.slice(0, 2).join(' ');
+            const line2 = words.slice(2).join(' ');
+            ctx.fillText(line1, x + width/2, y - 10);
+            ctx.fillText(line2, x + width/2, y + 10);
+        } else {
+            ctx.fillText(text, x + width/2, y);
+        }
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = colors.text;
+        ctx.fill();
+    }
+    
+    // Helper function to draw description text
+    function drawDescription(x, y, text, color) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, x + boxWidth/2, y);
+    }
+    
+    // Helper function to darken a color for borders
+    function darkenColor(color) {
+        // Simple darkening for example purposes
+        return color;
+    }
 } 
