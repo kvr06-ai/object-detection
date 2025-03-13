@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initYOLOConfidenceDemo();
     initNetworkArchitectureViz();
     initAlgorithmComparisonChart();
-    initDETRAttentionDemo();
     initDetectorChallenge();
     generateHaarFeatureVisual();
     generateDPMVisualization();
@@ -17,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateFPNArchitectureVisual();
     generateCornerNetArchitectureVisual();
     generateCenterNetArchitectureVisual();
+    generateDETRArchitectureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -446,161 +446,6 @@ function initAlgorithmComparisonChart() {
             });
             
             chart.update();
-        });
-    }
-}
-
-// DETR Attention visualization demo
-function initDETRAttentionDemo() {
-    const detrDemo = document.getElementById('detr-attention-demo');
-    if (!detrDemo) return;
-    
-    const detrVisualization = document.getElementById('detr-visualization');
-    if (!detrVisualization) return;
-    
-    // Sample image and detections
-    detrVisualization.innerHTML = `
-        <div class="detr-demo">
-            <p>Select an object to visualize DETR's attention mechanism.</p>
-            <div class="detr-image-container">
-                <img src="https://source.unsplash.com/random/600x400/?street" alt="Sample image for DETR attention" class="detr-image">
-                <div class="detr-detection" data-id="1" style="left: 50px; top: 100px; width: 100px; height: 150px;">
-                    <div class="detr-label">Person (92%)</div>
-                </div>
-                <div class="detr-detection" data-id="2" style="left: 200px; top: 150px; width: 120px; height: 80px;">
-                    <div class="detr-label">Car (89%)</div>
-                </div>
-                <div class="detr-detection" data-id="3" style="left: 350px; top: 50px; width: 80px; height: 60px;">
-                    <div class="detr-label">Traffic Sign (76%)</div>
-                </div>
-                <div class="detr-attention-map" id="attention-map"></div>
-            </div>
-            <div class="detr-controls">
-                <button class="btn" id="attention-toggle">Toggle Attention Map</button>
-                <div class="detr-info">
-                    <p>DETR uses a Transformer architecture where each object query attends to different parts of the image. The attention map shows which parts of the image the model focused on for each detection.</p>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Add styles for the DETR demo
-    const style = document.createElement('style');
-    style.textContent = `
-        .detr-demo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .detr-image-container {
-            position: relative;
-            margin: 1rem 0;
-        }
-        .detr-image {
-            max-width: 100%;
-            display: block;
-        }
-        .detr-detection {
-            position: absolute;
-            border: 2px solid #3498db;
-            background-color: rgba(52, 152, 219, 0.1);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .detr-detection:hover {
-            background-color: rgba(52, 152, 219, 0.3);
-        }
-        .detr-detection.active {
-            border-color: #e74c3c;
-            background-color: rgba(231, 76, 60, 0.2);
-        }
-        .detr-label {
-            position: absolute;
-            top: -25px;
-            left: 0;
-            background-color: #3498db;
-            color: white;
-            padding: 2px 6px;
-            font-size: 12px;
-            border-radius: 4px;
-        }
-        .detr-detection.active .detr-label {
-            background-color: #e74c3c;
-        }
-        .detr-attention-map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: 100% 100%;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .detr-attention-map.visible {
-            opacity: 0.7;
-        }
-        .detr-controls {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-        .detr-info {
-            max-width: 600px;
-            text-align: center;
-            font-style: italic;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Set up event handlers
-    const detections = document.querySelectorAll('.detr-detection');
-    const attentionMap = document.getElementById('attention-map');
-    const attentionToggle = document.getElementById('attention-toggle');
-    
-    let isAttentionVisible = false;
-    let activeDetection = null;
-    
-    // Simulated attention maps (in a real implementation, these would come from the model)
-    const attentionMaps = {
-        '1': 'https://miro.medium.com/max/700/1*TRZrTcCCnuA5yTNO705f5g.jpeg',
-        '2': 'https://miro.medium.com/max/700/1*QQCm4r-V2StupIsRmA3d1A.jpeg',
-        '3': 'https://miro.medium.com/max/700/1*vvfRrNV2EiEH9iCl7_Vhgw.jpeg'
-    };
-    
-    detections.forEach(detection => {
-        detection.addEventListener('click', function() {
-            if (activeDetection) {
-                activeDetection.classList.remove('active');
-            }
-            
-            this.classList.add('active');
-            activeDetection = this;
-            
-            const detectionId = this.getAttribute('data-id');
-            attentionMap.style.backgroundImage = `url(${attentionMaps[detectionId]})`;
-            
-            if (!isAttentionVisible) {
-                attentionMap.classList.add('visible');
-                isAttentionVisible = true;
-                attentionToggle.textContent = 'Hide Attention Map';
-            }
-        });
-    });
-    
-    if (attentionToggle) {
-        attentionToggle.addEventListener('click', function() {
-            if (isAttentionVisible) {
-                attentionMap.classList.remove('visible');
-                this.textContent = 'Show Attention Map';
-            } else {
-                attentionMap.classList.add('visible');
-                this.textContent = 'Hide Attention Map';
-            }
-            isAttentionVisible = !isAttentionVisible;
         });
     }
 }
@@ -2200,6 +2045,241 @@ function generateCenterNetArchitectureVisual() {
     ctx.fillStyle = colors.detection;
     ctx.textAlign = 'center';
     ctx.fillText('Person: 0.94', exampleX + exampleSize/2, exampleY - exampleSize/4 - 5);
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = darkenColor(color);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Handle multiline text
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const line1 = words.slice(0, Math.ceil(words.length/2)).join(' ');
+            const line2 = words.slice(Math.ceil(words.length/2)).join(' ');
+            ctx.fillText(line1, x + width/2, y - 10);
+            ctx.fillText(line2, x + width/2, y + 10);
+        } else {
+            ctx.fillText(text, x + width/2, y);
+        }
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = colors.text;
+        ctx.fill();
+    }
+    
+    // Helper function to draw description text
+    function drawDescription(x, y, text, color) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, x, y);
+    }
+    
+    // Helper function to darken a color for borders
+    function darkenColor(color) {
+        // Simple darkening for example purposes
+        return color;
+    }
+} 
+
+// Generate DETR architecture visualization
+function generateDETRArchitectureVisual() {
+    const container = document.getElementById('detr-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 1400;  // Increased width to prevent diagram from being cut off
+    canvas.height = 480;
+    canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto';  // Ensure aspect ratio is maintained
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db',      // blue
+        backbone: '#2ecc71',   // green
+        encoder: '#9b59b6',    // purple
+        decoder: '#e74c3c',    // red
+        query: '#f39c12',      // orange
+        output: '#8e44ad',     // dark purple
+        text: '#2c3e50',       // dark blue
+        attention: '#34495e',  // dark gray
+        matching: '#16a085'    // teal
+    };
+    
+    // Define the architecture components and layout - with adjusted spacing
+    const componentHeight = 60;
+    const componentWidth = 110;
+    const longComponentWidth = 160;
+    const spacing = 60;       // Reduced spacing for better fit
+    const startX = 60;
+    const midY = canvas.height / 2;
+    
+    // Draw title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('DETR Architecture: End-to-End Object Detection with Transformers', canvas.width/2, 40);
+    
+    // Add subtitle
+    ctx.font = 'italic 14px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Direct set prediction approach using a CNN backbone and Transformer encoder-decoder', canvas.width/2, 70);
+    
+    // Draw image input
+    drawComponent(startX, midY, componentWidth, componentHeight, colors.input, 'Input Image');
+    
+    // Draw arrow to CNN backbone
+    drawArrow(startX + componentWidth, midY, startX + componentWidth + spacing, midY);
+    
+    // Draw CNN backbone
+    const backboneX = startX + componentWidth + spacing;
+    drawComponent(backboneX, midY, componentWidth, componentHeight, colors.backbone, 'CNN Backbone');
+    drawDescription(backboneX + componentWidth/2, midY + componentHeight/2 + 20, 'ResNet-50 or similar', colors.text);
+    
+    // Draw arrow to transformer encoder
+    drawArrow(backboneX + componentWidth, midY, backboneX + componentWidth + spacing, midY);
+    
+    // Draw transformer encoder
+    const encoderX = backboneX + componentWidth + spacing;
+    drawComponent(encoderX, midY, longComponentWidth, componentHeight, colors.encoder, 'Transformer Encoder');
+    drawDescription(encoderX + longComponentWidth/2, midY + componentHeight/2 + 20, 'Self-attention on feature maps', colors.text);
+    
+    // Draw attention visualization for encoder
+    drawAttentionPattern(encoderX + longComponentWidth/2, midY - componentHeight/2 - 30, colors.encoder);
+    
+    // Object queries input - adjusted position
+    const decoderX = encoderX + longComponentWidth + spacing * 1.5;
+    const queriesX = decoderX - spacing;
+    const queriesY = midY - 100;
+    
+    drawComponent(queriesX, queriesY, componentWidth, componentHeight, colors.query, 'Object Queries');
+    drawDescription(queriesX + componentWidth/2, queriesY + componentHeight/2 + 20, 'Learned position embeddings', colors.text);
+    
+    // Draw arrow from Transformer Encoder to Transformer Decoder
+    drawArrow(encoderX + longComponentWidth, midY, decoderX, midY);
+    
+    // Draw arrow from Object Queries to Transformer Decoder
+    drawArrow(queriesX + componentWidth, queriesY, decoderX + longComponentWidth/2, queriesY + 60);
+    
+    // Draw transformer decoder
+    drawComponent(decoderX, midY, longComponentWidth, componentHeight, colors.decoder, 'Transformer Decoder');
+    drawDescription(decoderX + longComponentWidth/2, midY + componentHeight/2 + 20, 'Cross-attention mechanism', colors.text);
+    
+    // Draw attention visualization for decoder
+    drawAttentionPattern(decoderX + longComponentWidth/2, midY - componentHeight/2 - 30, colors.decoder);
+    
+    // Draw arrow to outputs - adjusted spacing
+    const outputsX = decoderX + longComponentWidth + spacing;
+    drawArrow(decoderX + longComponentWidth, midY, outputsX, midY);
+    
+    // Split output into class and box predictions
+    const classesY = midY - 50;
+    const boxesY = midY + 50;
+    
+    // Draw arrows to split outputs
+    drawArrow(outputsX, midY, outputsX + spacing/2, midY);
+    drawArrow(outputsX + spacing/2, midY, outputsX + spacing, classesY);
+    drawArrow(outputsX + spacing/2, midY, outputsX + spacing, boxesY);
+    
+    // Draw class predictions output
+    drawComponent(outputsX + spacing, classesY, componentWidth, componentHeight, colors.output, 'Class Predictions');
+    
+    // Draw box predictions output
+    drawComponent(outputsX + spacing, boxesY, componentWidth, componentHeight, colors.output, 'Box Predictions');
+    
+    // Draw bipartite matching between predictions and ground truth - adjusted position
+    const matchingX = outputsX + spacing * 2 + componentWidth;
+    drawComponent(matchingX, midY, componentWidth, componentHeight*1.5, colors.matching, 'Bipartite Matching Loss');
+    drawDescription(matchingX + componentWidth/2, midY + componentHeight*1.5/2 + 20, 'One-to-one assignment', colors.text);
+    
+    // Draw arrow from class predictions to matching
+    drawArrow(outputsX + spacing + componentWidth, classesY, matchingX, midY - componentHeight*1.5/4);
+    
+    // Draw arrow from box predictions to matching
+    drawArrow(outputsX + spacing + componentWidth, boxesY, matchingX, midY + componentHeight*1.5/4);
+    
+    // Draw final output example - ensure this is visible
+    const exampleX = matchingX + componentWidth + spacing;
+    const exampleY = midY;
+    const exampleSize = 120;
+    
+    // Draw example detection image
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(exampleX, exampleY - exampleSize/2, exampleSize, exampleSize);
+    
+    // Draw example objects in the detection
+    ctx.strokeStyle = colors.output;
+    ctx.lineWidth = 2;
+    
+    // Draw person detection
+    ctx.strokeRect(exampleX + 20, exampleY - 40, 30, 70);
+    ctx.font = '10px Arial';
+    ctx.fillStyle = colors.output;
+    ctx.textAlign = 'center';
+    ctx.fillText('Person', exampleX + 35, exampleY - 45);
+    
+    // Draw car detection
+    ctx.strokeRect(exampleX + 60, exampleY, 40, 25);
+    ctx.fillText('Car', exampleX + 80, exampleY - 5);
+    
+    // Add a label to show this is the final output
+    ctx.font = 'bold 12px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Final Detections', exampleX + exampleSize/2, exampleY + exampleSize/2 + 20);
+    
+    // Draw arrow from matching to final output
+    drawArrow(matchingX + componentWidth, midY, exampleX, midY);
+    
+    // Helper function to draw attention pattern
+    function drawAttentionPattern(x, y, color) {
+        // Draw multiple circles with decreasing opacity to simulate attention heatmap
+        for(let i = 4; i > 0; i--) {
+            ctx.beginPath();
+            ctx.arc(x, y, i * 5, 0, Math.PI * 2);
+            ctx.fillStyle = `${color}${40 - i * 10}`;
+            ctx.fill();
+        }
+    }
     
     // Helper function to draw a component box with text
     function drawComponent(x, y, width, height, color, text) {

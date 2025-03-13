@@ -457,22 +457,11 @@
                 </ol>
                 
                 <figure>
-                    <img src="https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-23_at_4.49.40_PM_c7jyRxJ.png" alt="DETR architecture" width="600">
+                    <div id="detr-architecture"></div>
                     <figcaption>DETR architecture: CNN backbone, Transformer encoder-decoder, and bipartite matching loss.</figcaption>
                 </figure>
                 
                 <p>The key innovation in DETR is treating object detection as a direct set prediction problem. Unlike previous approaches that predict a large number of candidate boxes and then filter them, DETR directly predicts a fixed set of objects with no duplicate detections. This is achieved through the bipartite matching loss, which finds the optimal one-to-one assignment between predictions and ground truth objects.</p>
-                
-                <div class="interactive-demo" id="detr-attention-demo">
-                    <h4>DETR Attention Visualization</h4>
-                    <p>The attention mechanism in DETR allows the model to focus on relevant parts of the image for each prediction. Select a detection to visualize its attention pattern:</p>
-                    
-                    <div class="visualization-container">
-                        <div id="detr-visualization">
-                            <!-- DETR visualization will be rendered here -->
-                        </div>
-                    </div>
-                </div>
                 
                 <h3>Deformable DETR and Efficient Variants</h3>
                 <p>While DETR achieved comparable performance to Faster R-CNN, it had some limitations, particularly slow convergence during training and difficulties with small objects. To address these issues, researchers developed several improved variants:</p>
