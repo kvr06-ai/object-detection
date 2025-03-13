@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateSSDArchitectureVisual();
     generateFPNArchitectureVisual();
     generateCornerNetArchitectureVisual();
+    generateCenterNetArchitectureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -2018,6 +2019,201 @@ function generateCornerNetArchitectureVisual() {
         
         // Draw text
         ctx.font = 'bold 12px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Handle multiline text
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const line1 = words.slice(0, Math.ceil(words.length/2)).join(' ');
+            const line2 = words.slice(Math.ceil(words.length/2)).join(' ');
+            ctx.fillText(line1, x + width/2, y - 10);
+            ctx.fillText(line2, x + width/2, y + 10);
+        } else {
+            ctx.fillText(text, x + width/2, y);
+        }
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = colors.text;
+        ctx.fill();
+    }
+    
+    // Helper function to draw description text
+    function drawDescription(x, y, text, color) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, x, y);
+    }
+    
+    // Helper function to darken a color for borders
+    function darkenColor(color) {
+        // Simple darkening for example purposes
+        return color;
+    }
+} 
+
+// Generate CenterNet architecture visualization
+function generateCenterNetArchitectureVisual() {
+    const container = document.getElementById('centernet-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 1000;  // Wide canvas to prevent trimming
+    canvas.height = 400;
+    canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto';  // Ensure aspect ratio is maintained
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db',    // blue
+        backbone: '#2ecc71', // green 
+        heatmap: '#9b59b6',  // purple
+        size: '#e74c3c',     // red
+        offset: '#f39c12',   // orange
+        detection: '#8e44ad',// dark purple
+        text: '#2c3e50'      // dark blue
+    };
+    
+    // Define the architecture components and layout
+    const boxHeight = 60;
+    const boxWidth = 120;
+    const spacing = 80;
+    const startX = 60;
+    const midY = canvas.height / 2;
+    
+    // Draw title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('CenterNet Architecture', canvas.width/2, 30);
+    
+    // Add subtitle
+    ctx.font = 'italic 14px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Anchor-free detector that predicts object centers and sizes', canvas.width/2, 60);
+    
+    // Draw the input image
+    drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
+    
+    // Draw arrow to backbone
+    drawArrow(startX + boxWidth, midY, startX + boxWidth + spacing, midY);
+    
+    // Draw backbone
+    const backboneX = startX + boxWidth + spacing;
+    drawComponent(backboneX, midY, boxWidth, boxHeight, colors.backbone, 'Backbone CNN');
+    drawDescription(backboneX + boxWidth/2, midY + boxHeight/2 + 20, 'Feature extraction', colors.text);
+    
+    // Draw arrow to feature map
+    drawArrow(backboneX + boxWidth, midY, backboneX + boxWidth + spacing, midY);
+    
+    // Draw feature map output
+    const featureMapX = backboneX + boxWidth + spacing;
+    drawComponent(featureMapX, midY, boxWidth, boxHeight, colors.backbone, 'Feature Maps');
+    
+    // Split into three branches
+    const branchesX = featureMapX + boxWidth + spacing;
+    const branchY1 = midY - 100;  // Heatmap branch
+    const branchY2 = midY;        // Size branch
+    const branchY3 = midY + 100;  // Offset branch
+    
+    // Draw arrows from feature map to branches
+    drawArrow(featureMapX + boxWidth, midY, branchesX - spacing/2, midY);
+    drawArrow(branchesX - spacing/2, midY, branchesX, branchY1);
+    drawArrow(branchesX - spacing/2, midY, branchesX, branchY2);
+    drawArrow(branchesX - spacing/2, midY, branchesX, branchY3);
+    
+    // Draw branches
+    drawComponent(branchesX, branchY1, boxWidth, boxHeight, colors.heatmap, 'Center Heatmap');
+    drawDescription(branchesX + boxWidth/2, branchY1 + boxHeight/2 + 20, 'Predicts object centers', colors.text);
+    
+    drawComponent(branchesX, branchY2, boxWidth, boxHeight, colors.size, 'Size Prediction');
+    drawDescription(branchesX + boxWidth/2, branchY2 + boxHeight/2 + 20, 'Width and height', colors.text);
+    
+    drawComponent(branchesX, branchY3, boxWidth, boxHeight, colors.offset, 'Offset Prediction');
+    drawDescription(branchesX + boxWidth/2, branchY3 + boxHeight/2 + 20, 'Fine position adjustment', colors.text);
+    
+    // Draw arrows to detection output
+    const detectionX = branchesX + boxWidth + spacing;
+    drawArrow(branchesX + boxWidth, branchY1, detectionX - spacing/2, branchY1);
+    drawArrow(branchesX + boxWidth, branchY2, detectionX - spacing/2, branchY2);
+    drawArrow(branchesX + boxWidth, branchY3, detectionX - spacing/2, branchY3);
+    
+    // Converge arrows
+    drawArrow(detectionX - spacing/2, branchY1, detectionX, midY);
+    drawArrow(detectionX - spacing/2, branchY2, detectionX, midY);
+    drawArrow(detectionX - spacing/2, branchY3, detectionX, midY);
+    
+    // Draw detection output
+    drawComponent(detectionX, midY, boxWidth, boxHeight, colors.detection, 'Object Detections');
+    
+    // Draw example detection
+    const exampleX = detectionX + boxWidth + 70;
+    const exampleY = midY;
+    const exampleSize = 100;
+    
+    // Draw example image
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(exampleX, exampleY - exampleSize/2, exampleSize, exampleSize);
+    
+    // Draw center point
+    ctx.fillStyle = colors.heatmap;
+    ctx.beginPath();
+    ctx.arc(exampleX + exampleSize/2, exampleY, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Draw bounding box from center
+    ctx.strokeStyle = colors.detection;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(exampleX + exampleSize/4, exampleY - exampleSize/4, exampleSize/2, exampleSize/2);
+    
+    // Add label
+    ctx.font = '12px Arial';
+    ctx.fillStyle = colors.detection;
+    ctx.textAlign = 'center';
+    ctx.fillText('Person: 0.94', exampleX + exampleSize/2, exampleY - exampleSize/4 - 5);
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = darkenColor(color);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 14px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
