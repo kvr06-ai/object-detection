@@ -1,6 +1,6 @@
 # Object Detection Evolution: Interactive Article
 
-This project contains an interactive web article that explores the evolution of object detection algorithms from HOG to YOLO to DETR. The article includes interactive demonstrations, visualizations, and technical explanations of various object detection methodologies.
+This project contains an interactive web article that explores the evolution of object detection algorithms from HOG to YOLO to DETR. The article includes interactive demonstrations, visualizations, and technical explanations of various object detection methodologies. You can read the interactive version of this article here: https://kaushikrajan.me/blog/object-detection/
 
 ## Features
 
