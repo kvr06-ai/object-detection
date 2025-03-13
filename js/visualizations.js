@@ -1154,9 +1154,10 @@ function generateMaskRCNNArchitectureVisual() {
     if (!container) return;
     
     const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 350;
+    canvas.width = 1200;  // Increased width further to ensure entire architecture is visible
+    canvas.height = 400;  // Maintaining height for better spacing
     canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto';  // Ensure aspect ratio is maintained
     container.appendChild(canvas);
     
     const ctx = canvas.getContext('2d');
@@ -1167,22 +1168,34 @@ function generateMaskRCNNArchitectureVisual() {
     
     // Define colors
     const colors = {
-        input: '#3498db', // blue
+        input: '#3498db',    // blue
         backbone: '#2ecc71', // green 
-        rpn: '#9b59b6', // purple
-        roi: '#e74c3c', // red
-        fcn: '#f39c12', // orange
-        bbox: '#1abc9c', // turquoise
-        mask: '#8e44ad', // dark purple
-        text: '#2c3e50' // dark blue
+        rpn: '#9b59b6',      // purple
+        roi: '#e74c3c',      // red
+        fcn: '#f39c12',      // orange
+        bbox: '#1abc9c',     // turquoise
+        mask: '#8e44ad',     // dark purple
+        text: '#2c3e50'      // dark blue
     };
     
-    // Define the architecture components and layout
+    // Define the architecture components and layout with adjusted spacing
     const boxHeight = 60;
-    const boxWidth = 120;
-    const spacing = 80;
+    const boxWidth = 110;    // Slightly reduced width of each box
+    const spacing = 65;      // Slightly reduced spacing between components
     const startX = 30;
     const midY = canvas.height / 2;
+    
+    // Draw title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Mask R-CNN Architecture', canvas.width/2, 30);
+    
+    // Add note about extension of Faster R-CNN
+    ctx.font = 'italic 14px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Extends Faster R-CNN with a parallel mask prediction branch', canvas.width/2, 60);
     
     // Draw the input image
     drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
@@ -1213,8 +1226,8 @@ function generateMaskRCNNArchitectureVisual() {
     
     // Split into two paths: box prediction and mask prediction
     const splitX = roiX + boxWidth + spacing;
-    const splitY1 = midY - 60; // Upper branch
-    const splitY2 = midY + 60; // Lower branch
+    const splitY1 = midY - 80;  // Upper branch (increased separation)
+    const splitY2 = midY + 80;  // Lower branch (increased separation)
     
     // Draw arrows from ROI to both branches
     drawArrow(roiX + boxWidth, midY, splitX - spacing/2, midY);
@@ -1237,7 +1250,7 @@ function generateMaskRCNNArchitectureVisual() {
     drawComponent(maskOutputX, splitY2, boxWidth, boxHeight, colors.mask, 'Instance Segmentation');
     drawDescription(maskOutputX, splitY2 + boxHeight/2 + 30, 'Per-class binary masks', colors.text);
     
-    // Add mask example visualization
+    // Add mask example visualization - position adjusted to ensure visibility
     const maskExampleX = maskOutputX + boxWidth + 20;
     const maskExampleY = splitY2;
     const maskSize = 50;
@@ -1251,6 +1264,12 @@ function generateMaskRCNNArchitectureVisual() {
     ctx.lineWidth = 2;
     ctx.stroke();
     
+    // Label for mask example
+    ctx.font = '12px Arial';
+    ctx.fillStyle = colors.mask;
+    ctx.textAlign = 'center';
+    ctx.fillText('Pixel Mask', maskExampleX + maskSize/2, maskExampleY + maskSize/2 + 20);
+    
     // Add bounding box example
     const bboxExampleX = bboxOutputX + boxWidth + 20;
     const bboxExampleY = splitY1;
@@ -1259,23 +1278,12 @@ function generateMaskRCNNArchitectureVisual() {
     ctx.lineWidth = 2;
     ctx.strokeRect(bboxExampleX, bboxExampleY - maskSize/2, maskSize, maskSize);
     
-    // Add label
+    // Add label for box example
     ctx.fillStyle = colors.bbox;
     ctx.font = '12px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Person: 0.98', bboxExampleX + maskSize/2, bboxExampleY - maskSize/2 - 5);
-    
-    // Add title
-    ctx.font = 'bold 24px Arial';
-    ctx.fillStyle = colors.text;
-    ctx.textAlign = 'center';
-    ctx.fillText('Mask R-CNN Architecture', canvas.width/2, 30);
-    
-    // Add note about extension of Faster R-CNN
-    ctx.font = 'italic 14px Arial';
-    ctx.fillStyle = colors.text;
-    ctx.textAlign = 'center';
-    ctx.fillText('Extends Faster R-CNN with a parallel mask prediction branch', canvas.width/2, 60);
+    ctx.fillText('Class: Person (0.98)', bboxExampleX + maskSize/2, bboxExampleY - maskSize/2 - 5);
+    ctx.fillText('Bounding Box', bboxExampleX + maskSize/2, bboxExampleY + maskSize/2 + 20);
     
     // Helper function to draw a component box with text
     function drawComponent(x, y, width, height, color, text) {
@@ -1284,7 +1292,7 @@ function generateMaskRCNNArchitectureVisual() {
         ctx.fillRect(x, y - height/2, width, height);
         
         // Draw border
-        ctx.strokeStyle = darkenColor(color);
+        ctx.strokeStyle = color;
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y - height/2, width, height);
         
@@ -1335,12 +1343,6 @@ function generateMaskRCNNArchitectureVisual() {
         ctx.fillStyle = color;
         ctx.textAlign = 'center';
         ctx.fillText(text, x + boxWidth/2, y);
-    }
-    
-    // Helper function to darken a color for borders
-    function darkenColor(color) {
-        // Simple darkening for example purposes
-        return color;
     }
 }
 
