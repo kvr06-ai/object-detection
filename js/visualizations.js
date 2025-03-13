@@ -1092,7 +1092,7 @@ function generateRCNNArchitectureVisual() {
     if (!container) return;
     
     const canvas = document.createElement('canvas');
-    canvas.width = 800;
+    canvas.width = 1100;  // Increased from 800 to 1100 for more space
     canvas.height = 300;
     canvas.style.maxWidth = '100%';
     container.appendChild(canvas);
@@ -1116,7 +1116,7 @@ function generateRCNNArchitectureVisual() {
     // Define the architecture components and layout
     const boxHeight = 60;
     const boxWidth = 100;
-    const spacing = 100;
+    const spacing = 90;   // Reduced spacing slightly from 100 to 90
     const startX = 50;
     const midY = canvas.height / 2;
     
@@ -1175,7 +1175,10 @@ function generateRCNNArchitectureVisual() {
     // Draw SVM classifier
     const svmX = cnnX + boxWidth + spacing;
     drawComponent(svmX, midY, boxWidth, boxHeight, colors.svm, 'SVM Classifiers');
-    drawDescription(svmX, midY + boxHeight/2 + 40, 'Classify each region & refine bounding boxes', colors.text);
+    
+    // Modified description placement
+    drawDescription(svmX, midY + boxHeight/2 + 40, 'Classify each region &', colors.text);
+    drawDescription(svmX, midY + boxHeight/2 + 55, 'refine bounding boxes', colors.text);
     
     // Draw output
     const outputX = svmX + boxWidth + spacing;
