@@ -164,17 +164,20 @@ function initYOLOConfidenceDemo() {
     const confidenceValue = document.getElementById('confidence-value');
     const detectionOutput = document.getElementById('detection-output');
     
-    // Sample detection data (would come from a real model in production)
+    // Sample detection data with 5 unique classes (no duplicates) spread across the image
     const detections = [
-        { class: 'person', confidence: 0.92, box: [50, 30, 100, 200] },
-        { class: 'car', confidence: 0.85, box: [150, 100, 250, 180] },
-        { class: 'bicycle', confidence: 0.76, box: [300, 150, 400, 220] },
-        { class: 'dog', confidence: 0.67, box: [250, 250, 320, 320] },
-        { class: 'cat', confidence: 0.55, box: [400, 200, 450, 250] },
-        { class: 'bird', confidence: 0.42, box: [350, 50, 380, 80] },
-        { class: 'chair', confidence: 0.38, box: [100, 280, 180, 350] },
-        { class: 'bottle', confidence: 0.25, box: [420, 300, 440, 350] }
+        // Higher confidence detections (>50%)
+        { class: 'building', confidence: 0.92, box: [10, 50, 90, 175], color: '#e74c3c' },
+        { class: 'road', confidence: 0.87, box: [0, 175, 500, 275], color: '#3498db' },
+        { class: 'tree', confidence: 0.78, box: [330, 85, 365, 175], color: '#2ecc71' },
+        { class: 'window', confidence: 0.64, box: [220, 95, 240, 115], color: '#f39c12' },
+        
+        // Lower confidence detection (<50%)
+        { class: 'sky', confidence: 0.45, box: [0, 0, 500, 60], color: '#9b59b6' }
     ];
+    
+    // Background image URL for the detection demo
+    const backgroundImageUrl = 'img/street_scene.jpg';
     
     // Update detections based on confidence threshold
     function updateDetections(threshold) {
@@ -186,11 +189,11 @@ function initYOLOConfidenceDemo() {
         // Update visualization
         detectionOutput.innerHTML = `
             <div class="detection-image-container">
-                <div class="detection-image">
+                <div class="detection-image" style="background-image: url('${backgroundImageUrl}'); background-size: cover; background-position: center;">
                     ${visibleDetections.map(d => {
                         const [x, y, width, height] = d.box;
-                        return `<div class="detection-box" style="left: ${x}px; top: ${y}px; width: ${width - x}px; height: ${height - y}px;">
-                            <div class="detection-label">${d.class} (${Math.round(d.confidence * 100)}%)</div>
+                        return `<div class="detection-box" style="left: ${x}px; top: ${y}px; width: ${width - x}px; height: ${height - y}px; border-color: ${d.color}; background-color: ${d.color}33;">
+                            <div class="detection-label" style="background-color: ${d.color};">${d.class} (${Math.round(d.confidence * 100)}%)</div>
                         </div>`;
                     }).join('')}
                 </div>
@@ -207,7 +210,7 @@ function initYOLOConfidenceDemo() {
                     <tbody>
                         ${visibleDetections.map(d => `
                             <tr>
-                                <td>${d.class}</td>
+                                <td><span style="display: inline-block; width: 12px; height: 12px; background-color: ${d.color}; border-radius: 2px; margin-right: 5px;"></span>${d.class}</td>
                                 <td>${Math.round(d.confidence * 100)}%</td>
                             </tr>
                         `).join('')}
