@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initYOLOConfidenceDemo();
     initNetworkArchitectureViz();
     initAlgorithmComparisonChart();
-    initDetectorChallenge();
     generateHaarFeatureVisual();
     generateDPMVisualization();
     generateRCNNArchitectureVisual();
@@ -17,7 +16,246 @@ document.addEventListener('DOMContentLoaded', () => {
     generateCornerNetArchitectureVisual();
     generateCenterNetArchitectureVisual();
     generateDETRArchitectureVisual();
+    
 });
+
+// Function to generate quiz detection images
+function generateQuizDetectionImages() {
+    // Generate Faster R-CNN detection image
+    generateFasterRCNNDetectionImage();
+    
+    // Generate YOLO detection image
+    generateYOLODetectionImage();
+    
+    // Generate DETR detection image
+    generateDETRDetectionImage();
+}
+
+// Generate Faster R-CNN detection image
+function generateFasterRCNNDetectionImage() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw background (street scene)
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground/road
+    ctx.fillStyle = '#555555'; // Dark gray for road
+    ctx.fillRect(0, 250, canvas.width, 150);
+    
+    // Draw buildings/background objects
+    ctx.fillStyle = '#8B4513'; // Building color
+    ctx.fillRect(50, 100, 120, 150);
+    ctx.fillRect(200, 80, 150, 170);
+    ctx.fillRect(400, 120, 100, 130);
+    
+    // Draw cars
+    drawRectWithLabel(ctx, 80, 280, 100, 50, 'Car: 98%', '#FF0000');
+    drawRectWithLabel(ctx, 250, 270, 120, 60, 'Car: 99%', '#FF0000');
+    drawRectWithLabel(ctx, 430, 260, 90, 55, 'Car: 96%', '#FF0000');
+    
+    // Draw people
+    drawRectWithLabel(ctx, 180, 220, 25, 50, 'Person: 95%', '#00FF00');
+    drawRectWithLabel(ctx, 350, 200, 30, 70, 'Person: 97%', '#00FF00');
+    
+    // Add Faster R-CNN style info
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 230, 30);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('Faster R-CNN Detection', 10, 20);
+    
+    // Save as image
+    saveCanvasAsImage(canvas, 'img/quiz/faster-rcnn-detection.jpg');
+}
+
+// Generate YOLO detection image
+function generateYOLODetectionImage() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw background (urban scene)
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground/road
+    ctx.fillStyle = '#555555'; // Dark gray for road
+    ctx.fillRect(0, 280, canvas.width, 120);
+    
+    // Draw buildings/background objects
+    ctx.fillStyle = '#8B4513'; // Building color
+    ctx.fillRect(20, 100, 140, 180);
+    ctx.fillRect(220, 80, 130, 200);
+    ctx.fillRect(420, 120, 160, 160);
+    
+    // CHARACTERISTIC FEATURE 1: YOLO grid overlay
+    // Draw more prominent grid lines to emphasize YOLO's grid-based approach
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    
+    // Draw grid cells (YOLO divides image into grid cells)
+    const gridSize = 100;
+    
+    // Draw vertical grid lines
+    for (let x = 0; x <= canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    
+    // Draw horizontal grid lines
+    for (let y = 0; y <= canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    
+    // CHARACTERISTIC FEATURE 2: Simple format labels with lower confidence values
+    // Draw cars (YOLO style - simpler labels, no ":" format)
+    drawRectWithLabel(ctx, 75, 290, 110, 60, 'car 0.92', '#FF0000');
+    drawRectWithLabel(ctx, 240, 280, 130, 65, 'car 0.88', '#FF0000');
+    drawRectWithLabel(ctx, 420, 270, 100, 70, 'car 0.79', '#FF0000');
+    
+    // Draw people (YOLO style)
+    drawRectWithLabel(ctx, 170, 230, 30, 60, 'person 0.85', '#00FF00');
+    drawRectWithLabel(ctx, 360, 210, 35, 80, 'person 0.82', '#00FF00');
+    
+    // Draw a traffic sign
+    drawRectWithLabel(ctx, 290, 150, 40, 40, 'sign 0.76', '#0000FF');
+    
+    // Add YOLO style info
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 180, 30);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('YOLO Detection', 10, 20);
+    
+    // Save as image
+    saveCanvasAsImage(canvas, 'img/quiz/yolo-detection.jpg');
+}
+
+// Generate DETR detection image
+function generateDETRDetectionImage() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw background (urban scene)
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground/road
+    ctx.fillStyle = '#555555'; // Dark gray for road
+    ctx.fillRect(0, 260, canvas.width, 140);
+    
+    // Draw buildings/background objects
+    ctx.fillStyle = '#8B4513'; // Building color
+    ctx.fillRect(30, 90, 120, 170);
+    ctx.fillRect(210, 70, 140, 190);
+    ctx.fillRect(410, 110, 150, 150);
+    
+    // CHARACTERISTIC FEATURE 1: Transformer Attention Visualization
+    // Object attention points (yellow dots at the center of detected objects)
+    const attentionPoints = [
+        {x: 130, y: 300}, {x: 260, y: 290}, {x: 420, y: 280}, // Cars
+        {x: 180, y: 220}, {x: 350, y: 200},                  // People
+        {x: 500, y: 180}                                     // Traffic light
+    ];
+    
+    // Central query point (representing transformer query)
+    const queryX = 300;
+    const queryY = 200;
+    
+    // Draw central query point (larger, different color)
+    ctx.fillStyle = 'rgba(255, 165, 0, 0.7)'; // Orange for query
+    ctx.beginPath();
+    ctx.arc(queryX, queryY, 15, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw connections from query to attention points
+    ctx.strokeStyle = 'rgba(255, 255, 0, 0.4)';
+    ctx.lineWidth = 2;
+    
+    attentionPoints.forEach(point => {
+        // Draw connecting line (attention)
+        ctx.beginPath();
+        ctx.moveTo(queryX, queryY);
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
+        
+        // Draw attention point (yellow dot)
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.7)';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    
+    // CHARACTERISTIC FEATURE 2: Rounded bounding boxes with parentheses notation
+    // Draw cars with rounded bounding boxes
+    drawRectWithLabel(ctx, 80, 285, 100, 50, 'car (0.97)', '#FF0000', true);
+    drawRectWithLabel(ctx, 250, 275, 120, 60, 'car (0.98)', '#FF0000', true);
+    drawRectWithLabel(ctx, 430, 265, 90, 55, 'car (0.94)', '#FF0000', true);
+    
+    // Draw people with rounded bounding boxes
+    drawRectWithLabel(ctx, 180, 220, 25, 50, 'person (0.96)', '#00FF00', true);
+    drawRectWithLabel(ctx, 350, 200, 30, 70, 'person (0.95)', '#00FF00', true);
+    
+    // Draw traffic light with rounded box
+    drawRectWithLabel(ctx, 500, 180, 15, 30, 'traffic light (0.89)', '#0000FF', true);
+    
+    // Add DETR style info
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 180, 30);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('DETR Detection', 10, 20);
+    
+    return canvas;
+}
+
+// Helper function to draw rectangle with label
+function drawRectWithLabel(ctx, x, y, width, height, label, color, isRounded = false) {
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = color;
+    
+    if (isRounded) {
+        // DETR style rounded rectangles
+        const radius = 8;
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.stroke();
+    } else {
+        // Standard rectangle
+        ctx.strokeRect(x, y, width, height);
+    }
+    
+    // Draw label background
+    const labelWidth = ctx.measureText(label).width + 10;
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y - 20, labelWidth, 20);
+    
+    // Draw label text
+    ctx.fillStyle = 'white';
+    ctx.font = '12px Arial';
+    ctx.fillText(label, x + 5, y - 5);
+}
 
 // Demo for Histogram of Oriented Gradients
 function initHOGDemo() {
@@ -455,25 +693,33 @@ function initDetectorChallenge() {
     const challenge = document.getElementById('detector-challenge');
     if (!challenge) return;
     
-    // Sample detector outputs
+    // Create canvases for the visualizations
+    const fasterRCNNCanvas = createFasterRCNNDetectionImage();
+    const yoloCanvas = createYOLODetectionImage();
+    const detrCanvas = createDETRDetectionImage();
+    
+    // Sample detector outputs with correct detector type labels
     const detectorOutputs = [
         {
             id: 1,
-            image: 'https://production-media.paperswithcode.com/methods/teaser_ICCVW_2019.jpg',
+            canvas: fasterRCNNCanvas,
             detector: 'Faster R-CNN',
-            difficulty: 'medium'
+            difficulty: 'medium',
+            description: 'Precise bounding boxes with high confidence percentages and class labels.'
         },
         {
             id: 2,
-            image: 'https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-27_at_2.44.42_PM.png',
+            canvas: yoloCanvas,
             detector: 'YOLO',
-            difficulty: 'easy'
+            difficulty: 'easy',
+            description: 'Grid-based detection with simplified confidence values and class names.'
         },
         {
             id: 3,
-            image: 'https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-23_at_4.49.40_PM_c7jyRxJ.png',
+            canvas: detrCanvas,
             detector: 'DETR',
-            difficulty: 'hard'
+            difficulty: 'hard',
+            description: 'Transformer approach with attention visualization and rounded bounding boxes.'
         }
     ];
     
@@ -481,10 +727,13 @@ function initDetectorChallenge() {
     let challengeHTML = '';
     
     detectorOutputs.forEach(output => {
+        // Convert canvas to data URL
+        const imageDataUrl = output.canvas.toDataURL('image/png');
+        
         challengeHTML += `
             <div class="challenge-card" data-id="${output.id}">
                 <div class="challenge-image">
-                    <img src="${output.image}" alt="Detection output ${output.id}">
+                    <img src="${imageDataUrl}" alt="Detection output ${output.id}">
                 </div>
                 <div class="challenge-options">
                     <p>Which detector produced this output?</p>
@@ -508,7 +757,8 @@ function initDetectorChallenge() {
             display: flex;
             flex-direction: column;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
+            margin: 0 auto 20px auto;
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
@@ -516,13 +766,13 @@ function initDetectorChallenge() {
         }
         .challenge-image {
             width: 100%;
-            height: 200px;
+            max-height: 300px;
             overflow: hidden;
         }
         .challenge-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
         .challenge-options {
             padding: 1rem;
@@ -2347,3 +2597,198 @@ function generateDETRArchitectureVisual() {
         return color;
     }
 } 
+
+// Create Faster R-CNN detection image
+function createFasterRCNNDetectionImage() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw background (street scene)
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground/road
+    ctx.fillStyle = '#555555'; // Dark gray for road
+    ctx.fillRect(0, 250, canvas.width, 150);
+    
+    // Draw buildings/background objects
+    ctx.fillStyle = '#8B4513'; // Building color
+    ctx.fillRect(50, 100, 120, 150);
+    ctx.fillRect(200, 80, 150, 170);
+    ctx.fillRect(400, 120, 100, 130);
+    
+    // CHARACTERISTIC FEATURE 1: Precise bounding boxes with high confidence percentages
+    // Draw cars with precise bounding boxes and high confidence
+    drawRectWithLabel(ctx, 80, 280, 100, 50, 'Car: 98%', '#FF0000');
+    drawRectWithLabel(ctx, 250, 270, 120, 60, 'Car: 99%', '#FF0000');
+    drawRectWithLabel(ctx, 430, 260, 90, 55, 'Car: 96%', '#FF0000');
+    
+    // Draw people with precise bounding boxes and high confidence
+    drawRectWithLabel(ctx, 180, 220, 25, 50, 'Person: 95%', '#00FF00');
+    drawRectWithLabel(ctx, 350, 200, 30, 70, 'Person: 97%', '#00FF00');
+    
+    // CHARACTERISTIC FEATURE 2: Region Proposal Network visualization (simplified)
+    // Draw a few example region proposals (semi-transparent)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    // Car proposals
+    ctx.strokeRect(75, 275, 110, 60);
+    ctx.strokeRect(245, 265, 130, 70);
+    ctx.strokeRect(425, 255, 100, 65);
+    // Person proposals
+    ctx.strokeRect(175, 215, 35, 60);
+    ctx.strokeRect(345, 195, 40, 80);
+    
+    // Add Faster R-CNN style info
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 230, 30);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('Faster R-CNN Detection', 10, 20);
+    
+    return canvas;
+}
+
+// Create YOLO detection image
+function createYOLODetectionImage() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw background (urban scene)
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground/road
+    ctx.fillStyle = '#555555'; // Dark gray for road
+    ctx.fillRect(0, 280, canvas.width, 120);
+    
+    // Draw buildings/background objects
+    ctx.fillStyle = '#8B4513'; // Building color
+    ctx.fillRect(20, 100, 140, 180);
+    ctx.fillRect(220, 80, 130, 200);
+    ctx.fillRect(420, 120, 160, 160);
+    
+    // CHARACTERISTIC FEATURE 1: YOLO grid overlay
+    // Draw more prominent grid lines to emphasize YOLO's grid-based approach
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    
+    // Draw grid cells (YOLO divides image into grid cells)
+    const gridSize = 100;
+    
+    // Draw vertical grid lines
+    for (let x = 0; x <= canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    
+    // Draw horizontal grid lines
+    for (let y = 0; y <= canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    
+    // CHARACTERISTIC FEATURE 2: Simple format labels with lower confidence values
+    // Draw cars (YOLO style - simpler labels, no ":" format)
+    drawRectWithLabel(ctx, 75, 290, 110, 60, 'car 0.92', '#FF0000');
+    drawRectWithLabel(ctx, 240, 280, 130, 65, 'car 0.88', '#FF0000');
+    drawRectWithLabel(ctx, 420, 270, 100, 70, 'car 0.79', '#FF0000');
+    
+    // Draw people (YOLO style)
+    drawRectWithLabel(ctx, 170, 230, 30, 60, 'person 0.85', '#00FF00');
+    drawRectWithLabel(ctx, 360, 210, 35, 80, 'person 0.82', '#00FF00');
+    
+    // Draw a traffic sign
+    drawRectWithLabel(ctx, 290, 150, 40, 40, 'sign 0.76', '#0000FF');
+    
+    // Add YOLO style info
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 180, 30);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('YOLO Detection', 10, 20);
+    
+    return canvas;
+}
+
+// Create DETR detection image
+function createDETRDetectionImage() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw background (urban scene)
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ground/road
+    ctx.fillStyle = '#555555'; // Dark gray for road
+    ctx.fillRect(0, 260, canvas.width, 140);
+    
+    // Draw buildings/background objects
+    ctx.fillStyle = '#8B4513'; // Building color
+    ctx.fillRect(30, 90, 120, 170);
+    ctx.fillRect(210, 70, 140, 190);
+    ctx.fillRect(410, 110, 150, 150);
+    
+    // Draw dot attention for transformer approach
+    const attentionPoints = [
+        {x: 130, y: 300}, {x: 260, y: 290}, {x: 420, y: 280}, // Cars
+        {x: 180, y: 220}, {x: 350, y: 200},                  // People
+        {x: 500, y: 180}                                     // Traffic light
+    ];
+    
+    // Draw attention dots
+    ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+    attentionPoints.forEach(point => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    
+    // Draw query connections (transformer attention visualization)
+    ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
+    ctx.lineWidth = 2;
+    
+    // Central query point
+    const queryX = 300;
+    const queryY = 200;
+    
+    // Draw connections from query to attention points
+    attentionPoints.forEach(point => {
+        ctx.beginPath();
+        ctx.moveTo(queryX, queryY);
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
+    });
+    
+    // Draw cars
+    drawRectWithLabel(ctx, 80, 285, 100, 50, 'car (0.97)', '#FF0000', true);
+    drawRectWithLabel(ctx, 250, 275, 120, 60, 'car (0.98)', '#FF0000', true);
+    drawRectWithLabel(ctx, 430, 265, 90, 55, 'car (0.94)', '#FF0000', true);
+    
+    // Draw people
+    drawRectWithLabel(ctx, 180, 220, 25, 50, 'person (0.96)', '#00FF00', true);
+    drawRectWithLabel(ctx, 350, 200, 30, 70, 'person (0.95)', '#00FF00', true);
+    
+    // Add traffic light
+    drawRectWithLabel(ctx, 500, 180, 15, 30, 'traffic light (0.89)', '#0000FF', true);
+    
+    // Add DETR style info
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 180, 30);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('DETR Detection', 10, 20);
+    
+    return canvas;
+}
