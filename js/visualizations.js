@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateMaskRCNNArchitectureVisual();
     generateSSDArchitectureVisual();
     generateFPNArchitectureVisual();
+    generateCornerNetArchitectureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -1839,5 +1840,234 @@ function generateFPNArchitectureVisual() {
         ctx.closePath();
         ctx.fillStyle = color;
         ctx.fill();
+    }
+} 
+
+// Generate CornerNet architecture visualization
+function generateCornerNetArchitectureVisual() {
+    const container = document.getElementById('cornernet-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;  // Increased width from 1000px to 1200px to ensure all components fit
+    canvas.height = 450;  // Maintaining the height
+    canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto';  // Ensure aspect ratio is maintained
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db',    // blue
+        backbone: '#2ecc71', // green 
+        tl: '#9b59b6',       // purple for top-left corner
+        br: '#e74c3c',       // red for bottom-right corner
+        heatmap: '#f39c12',  // orange
+        embedding: '#1abc9c',// turquoise
+        output: '#8e44ad',   // dark purple
+        text: '#2c3e50'      // dark blue
+    };
+    
+    // Define the architecture components and layout
+    const boxHeight = 60;
+    const boxWidth = 110;
+    const spacing = 55;      // Slightly reduced spacing to fit everything
+    const startX = 40;
+    const midY = canvas.height / 2;
+    
+    // Draw title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('CornerNet Architecture', canvas.width/2, 30);
+    
+    // Add subtitle
+    ctx.font = 'italic 14px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Predicts object corners (top-left and bottom-right) without anchors', canvas.width/2, 60);
+    
+    // Draw the input image
+    drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
+    
+    // Draw arrow to backbone
+    drawArrow(startX + boxWidth, midY, startX + boxWidth + spacing, midY);
+    
+    // Draw CNN backbone
+    const backboneX = startX + boxWidth + spacing;
+    const backboneWidth = boxWidth * 1.2;
+    const backboneHeight = boxHeight * 1.5;
+    
+    ctx.fillStyle = colors.backbone;
+    ctx.fillRect(backboneX, midY - backboneHeight/2, backboneWidth, backboneHeight);
+    ctx.strokeStyle = darkenColor(colors.backbone);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(backboneX, midY - backboneHeight/2, backboneWidth, backboneHeight);
+    
+    // Backbone label
+    ctx.font = 'bold 16px Arial';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Hourglass', backboneX + backboneWidth/2, midY - 15);
+    ctx.fillText('Backbone', backboneX + backboneWidth/2, midY + 15);
+    
+    // Description
+    drawDescription(backboneX + backboneWidth/2, midY + backboneHeight/2 + 25, 'Feature extraction', colors.text);
+    
+    // Draw feature map output from backbone
+    const featureMapX = backboneX + backboneWidth + spacing;
+    
+    // Draw feature map
+    drawComponent(featureMapX, midY, boxWidth, boxHeight, colors.backbone, 'Feature Maps');
+    drawArrow(backboneX + backboneWidth, midY, featureMapX, midY);
+    
+    // Split into two branches: top-left and bottom-right
+    const splitX = featureMapX + boxWidth + spacing;
+    const splitY1 = midY - 100;  // Top branch for top-left corner
+    const splitY2 = midY + 100;  // Bottom branch for bottom-right corner
+    
+    // Draw arrows from feature map to both branches
+    drawArrow(featureMapX + boxWidth, midY, splitX - spacing/2, midY);
+    drawArrow(splitX - spacing/2, midY, splitX, splitY1);
+    drawArrow(splitX - spacing/2, midY, splitX, splitY2);
+    
+    // Draw top-left branch
+    drawComponent(splitX, splitY1, boxWidth, boxHeight, colors.tl, 'Top-Left Corner Detection');
+    drawArrow(splitX + boxWidth, splitY1, splitX + boxWidth + spacing, splitY1);
+    
+    // Draw bottom-right branch  
+    drawComponent(splitX, splitY2, boxWidth, boxHeight, colors.br, 'Bottom-Right Corner Detection');
+    drawArrow(splitX + boxWidth, splitY2, splitX + boxWidth + spacing, splitY2);
+    
+    // Draw outputs for each branch (heatmap, embedding, offset)
+    const outputsX = splitX + boxWidth + spacing;
+    const outputWidth = boxWidth * 0.8;
+    const outputHeight = boxHeight * 0.8;
+    const outputSpacing = 30;
+    
+    // Top-left branch outputs
+    drawComponent(outputsX, splitY1 - outputSpacing, outputWidth, outputHeight, colors.heatmap, 'Corner Heatmap');
+    drawComponent(outputsX, splitY1, outputWidth, outputHeight, colors.embedding, 'Embedding Vector');
+    drawComponent(outputsX, splitY1 + outputSpacing, outputWidth, outputHeight, colors.tl, 'Offset Prediction');
+    
+    // Bottom-right branch outputs
+    drawComponent(outputsX, splitY2 - outputSpacing, outputWidth, outputHeight, colors.heatmap, 'Corner Heatmap');
+    drawComponent(outputsX, splitY2, outputWidth, outputHeight, colors.embedding, 'Embedding Vector');
+    drawComponent(outputsX, splitY2 + outputSpacing, outputWidth, outputHeight, colors.br, 'Offset Prediction');
+    
+    // Draw arrows to corner pairing - increased spacing to ensure visibility
+    const pairingX = outputsX + outputWidth + spacing * 1.5;
+    const pairingY = midY;
+    
+    // Draw arrows from outputs to pairing
+    drawArrow(outputsX + outputWidth, splitY1, pairingX - spacing/2, splitY1);
+    drawArrow(pairingX - spacing/2, splitY1, pairingX, pairingY);
+    drawArrow(outputsX + outputWidth, splitY2, pairingX - spacing/2, splitY2);
+    drawArrow(pairingX - spacing/2, splitY2, pairingX, pairingY);
+    
+    // Draw corner pairing
+    drawComponent(pairingX, pairingY, boxWidth, boxHeight, colors.output, 'Corner Pairing');
+    drawDescription(pairingX + boxWidth/2, pairingY + boxHeight/2 + 15, 'Group corners by embedding similarity', colors.text);
+    
+    // Draw final output - detection results with increased spacing
+    const resultX = pairingX + boxWidth + spacing;
+    drawComponent(resultX, pairingY, boxWidth, boxHeight, colors.output, 'Bounding Boxes');
+    drawArrow(pairingX + boxWidth, pairingY, resultX, pairingY);
+    
+    // Draw example output
+    const exampleX = resultX + boxWidth + 30;
+    const exampleY = pairingY;
+    const exampleSize = 70;
+    
+    // Draw example image with TL and BR corners
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(exampleX, exampleY - exampleSize/2, exampleSize, exampleSize);
+    
+    // Draw TL and BR corners with a bounding box
+    ctx.fillStyle = colors.tl;
+    ctx.beginPath();
+    ctx.arc(exampleX + 10, exampleY - exampleSize/2 + 10, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.fillStyle = colors.br;
+    ctx.beginPath();
+    ctx.arc(exampleX + exampleSize - 10, exampleY + exampleSize/2 - 10, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Draw bounding box
+    ctx.strokeStyle = colors.output;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(exampleX + 10, exampleY - exampleSize/2 + 10, exampleSize - 20, exampleSize - 20);
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = darkenColor(color);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 12px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Handle multiline text
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const line1 = words.slice(0, Math.ceil(words.length/2)).join(' ');
+            const line2 = words.slice(Math.ceil(words.length/2)).join(' ');
+            ctx.fillText(line1, x + width/2, y - 10);
+            ctx.fillText(line2, x + width/2, y + 10);
+        } else {
+            ctx.fillText(text, x + width/2, y);
+        }
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = colors.text;
+        ctx.fill();
+    }
+    
+    // Helper function to draw description text
+    function drawDescription(x, y, text, color) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, x, y);
+    }
+    
+    // Helper function to darken a color for borders
+    function darkenColor(color) {
+        // Simple darkening for example purposes
+        return color;
     }
 } 
