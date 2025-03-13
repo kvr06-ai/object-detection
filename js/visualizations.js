@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateRCNNArchitectureVisual();
     generateMaskRCNNArchitectureVisual();
     generateSSDArchitectureVisual();
+    generateFPNArchitectureVisual();
 });
 
 // Demo for Histogram of Oriented Gradients
@@ -1544,7 +1545,7 @@ function generateSSDArchitectureVisual() {
         ctx.fillRect(x, y - height/2, width, height);
         
         // Draw border
-        ctx.strokeStyle = darkenColor(color);
+        ctx.strokeStyle = color;
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y - height/2, width, height);
         
@@ -1580,18 +1581,261 @@ function generateSSDArchitectureVisual() {
         ctx.stroke();
         
         // Draw arrowhead
-        ctx.beginPath();
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
-        ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
-        ctx.closePath();
-        ctx.fillStyle = colors.text;
-        ctx.fill();
+        drawArrowhead(toX, toY, angle, colors.text);
     }
     
-    // Helper function to darken a color for borders
-    function darkenColor(color) {
-        // Simple darkening for example purposes
-        return color;
+    // Helper function to draw arrowhead
+    function drawArrowhead(x, y, angle, color) {
+        const headSize = 8;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headSize * Math.cos(angle - Math.PI/6), y - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(x - headSize * Math.cos(angle + Math.PI/6), y - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+}
+
+// Generate Feature Pyramid Network architecture visualization
+function generateFPNArchitectureVisual() {
+    const container = document.getElementById('fpn-architecture');
+    if (!container) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 950;  // Further increase width to ensure Detection Heads is fully visible
+    canvas.height = 400; // Height for comfortable spacing
+    canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto'; // Ensure aspect ratio is maintained
+    container.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.fillStyle = '#f8f8f8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Define colors
+    const colors = {
+        input: '#3498db',     // blue
+        backbone: '#2ecc71',  // green 
+        topDown: '#9b59b6',   // purple
+        lateral: '#e74c3c',   // red
+        output: '#f39c12',    // orange
+        text: '#2c3e50'       // dark blue
+    };
+    
+    // Define components with adjusted spacing
+    const boxHeight = 50;
+    const boxWidth = 100;
+    const startX = 40;  // Keep start position
+    const midY = canvas.height / 2;
+    
+    // Draw title
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Feature Pyramid Network (FPN) Architecture', canvas.width/2, 40);
+    
+    // Draw input image
+    drawComponent(startX, midY, boxWidth, boxHeight, colors.input, 'Input Image');
+    
+    // Draw CNN backbone (vertically) - slightly reduce spacing
+    const backboneX = startX + boxWidth + 60;
+    const backboneWidth = 120;
+    const backboneHeight = 220;
+    
+    // Backbone network box
+    ctx.fillStyle = 'rgba(46, 204, 113, 0.1)'; // Light green
+    ctx.fillRect(backboneX, midY - backboneHeight/2, backboneWidth, backboneHeight);
+    ctx.strokeStyle = colors.backbone;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(backboneX, midY - backboneHeight/2, backboneWidth, backboneHeight);
+    
+    // Backbone network label
+    ctx.font = 'bold 16px Arial';
+    ctx.fillStyle = colors.backbone;
+    ctx.textAlign = 'center';
+    ctx.fillText('CNN Backbone', backboneX + backboneWidth/2, midY - backboneHeight/2 - 15);
+    
+    // Draw arrow from input to backbone
+    drawArrow(startX + boxWidth, midY, backboneX, midY);
+    
+    // Draw feature maps in backbone (C1-C5)
+    const featureLevels = 5;
+    const levelHeight = backboneHeight / featureLevels;
+    const featureMapSize = [60, 50, 40, 30, 20]; // Decreasing sizes for higher levels
+    
+    for (let i = 0; i < featureLevels; i++) {
+        const fmY = midY - backboneHeight/2 + i * levelHeight + levelHeight/2;
+        const fmX = backboneX + backboneWidth/2;
+        const fmSize = featureMapSize[i];
+        
+        // Feature map block
+        ctx.fillStyle = colors.backbone;
+        ctx.fillRect(fmX - fmSize/2, fmY - fmSize/4, fmSize, fmSize/2);
+        
+        // Feature map label
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`C${i+1}`, fmX, fmY);
+    }
+    
+    // Draw lateral connections and top-down pathway - slightly reduce width
+    const pyramidX = backboneX + backboneWidth + 90;
+    const pyramidWidth = 280;
+    
+    // Draw pyramid framework
+    ctx.fillStyle = 'rgba(155, 89, 182, 0.1)'; // Light purple
+    ctx.fillRect(pyramidX, midY - backboneHeight/2, pyramidWidth, backboneHeight);
+    ctx.strokeStyle = colors.topDown;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(pyramidX, midY - backboneHeight/2, pyramidWidth, backboneHeight);
+    
+    // Draw pyramid label
+    ctx.font = 'bold 16px Arial';
+    ctx.fillStyle = colors.topDown;
+    ctx.textAlign = 'center';
+    ctx.fillText('Feature Pyramid', pyramidX + pyramidWidth/2, midY - backboneHeight/2 - 15);
+    
+    // Draw the feature pyramid (P levels)
+    const pyramidLevels = 5;
+    const featureColors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db'];
+    
+    for (let i = 0; i < pyramidLevels; i++) {
+        const fmY = midY - backboneHeight/2 + i * levelHeight + levelHeight/2;
+        const fmX = pyramidX + pyramidWidth - 80;
+        const fmSize = featureMapSize[i];
+        
+        // Feature map in pyramid
+        ctx.fillStyle = featureColors[i];
+        ctx.fillRect(fmX - fmSize/2, fmY - fmSize/4, fmSize, fmSize/2);
+        
+        // Feature map label
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`P${i+1}`, fmX, fmY);
+        
+        // Draw arrow from backbone to pyramid
+        if (i < 4) { // C5-C2 get lateral connections
+            // Lateral connection arrow
+            ctx.setLineDash([5, 3]);
+            ctx.strokeStyle = colors.lateral;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(backboneX + backboneWidth, fmY);
+            ctx.lineTo(fmX - fmSize/2, fmY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Lateral connection label
+            if (i === 1) {
+                ctx.font = '12px Arial';
+                ctx.fillStyle = colors.lateral;
+                ctx.textAlign = 'center';
+                ctx.fillText('Lateral Connections', backboneX + backboneWidth + 60, fmY - 15);
+            }
+        }
+        
+        // Draw top-down connections
+        if (i > 0) {
+            const prevY = midY - backboneHeight/2 + (i-1) * levelHeight + levelHeight/2;
+            const prevSize = featureMapSize[i-1];
+            
+            // Top-down arrow
+            ctx.strokeStyle = colors.topDown;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(fmX, prevY + prevSize/4);
+            ctx.lineTo(fmX, fmY - fmSize/4);
+            ctx.stroke();
+            
+            // Add arrowhead
+            drawArrowhead(fmX, fmY - fmSize/4, Math.PI/2, colors.topDown);
+            
+            // Top-down connection label
+            if (i === 1) {
+                ctx.font = '12px Arial';
+                ctx.fillStyle = colors.topDown;
+                ctx.textAlign = 'center';
+                ctx.fillText('Top-down Pathway', fmX + 70, prevY + levelHeight/2);
+            }
+        }
+    }
+    
+    // Draw output and detection stage - ensure it's fully visible
+    const outputX = pyramidX + pyramidWidth + 70;
+    const outputWidth = 120;
+    const outputY = midY;
+    drawComponent(outputX, outputY, outputWidth, boxHeight, colors.output, 'Detection Heads');
+    drawArrow(pyramidX + pyramidWidth, midY, outputX, midY);
+    
+    // Add explanation text at the bottom
+    ctx.font = 'italic 16px Arial';
+    ctx.fillStyle = colors.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('FPN creates a feature pyramid with semantically strong features at all levels', 
+                 canvas.width/2, canvas.height - 30);
+    
+    // Helper function to draw a component box with text
+    function drawComponent(x, y, width, height, color, text) {
+        // Draw box
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - height/2, width, height);
+        
+        // Draw border
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y - height/2, width, height);
+        
+        // Draw text
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Handle multi-line text
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const line1 = words.slice(0, words.length/2).join(' ');
+            const line2 = words.slice(words.length/2).join(' ');
+            ctx.fillText(line1, x + width/2, y - 10);
+            ctx.fillText(line2, x + width/2, y + 10);
+        } else {
+            ctx.fillText(text, x + width/2, y);
+        }
+    }
+    
+    // Helper function to draw an arrow
+    function drawArrow(fromX, fromY, toX, toY) {
+        const headSize = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = colors.text;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw arrowhead
+        drawArrowhead(toX, toY, angle, colors.text);
+    }
+    
+    // Helper function to draw arrowhead
+    function drawArrowhead(x, y, angle, color) {
+        const headSize = 8;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headSize * Math.cos(angle - Math.PI/6), y - headSize * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(x - headSize * Math.cos(angle + Math.PI/6), y - headSize * Math.sin(angle + Math.PI/6));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
     }
 } 
